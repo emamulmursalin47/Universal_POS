@@ -1,103 +1,157 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+// pages/SubscriptionsPage.tsx
+import  { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, CreditCard } from 'lucide-react';
+import { Plus } from 'lucide-react';
+import { ActiveSubscription, SubscriptionPlan } from '@/types/subscription';
+import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
+import { SubscriptionPlansGrid } from '@/components/grids/SubscriptionGrids';
+import { SubscriptionsTable } from '@/components/tables/SubscriptionTable';
+import { CreatePlanModal } from '@/components/modals/CreatePlanModal';
+import { EditPlanModal } from '@/components/modals/EditPlanModal';
+import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
 
-const subscriptionPlans = [
+
+const mockActiveSubscriptions: ActiveSubscription[] = [
   {
-    id: 'basic',
-    name: 'Basic Plan',
-    price: 29.99,
-    billingCycle: 'monthly',
-    features: ['Up to 1,000 products', '2 staff accounts', 'Basic support', 'Standard reports'],
-    maxProducts: 1000,
-    maxUsers: 2,
-    supportLevel: 'basic',
+    id: 1,
+    shopName: 'TechStore Pro',
+    plan: 'Premium Plan',
+    status: 'active',
+    nextBilling: '2025-06-25',
+    amount: 99.99,
   },
   {
-    id: 'standard',
-    name: 'Standard Plan',
-    price: 49.99,
-    billingCycle: 'monthly',
-    features: ['Up to 5,000 products', '5 staff accounts', 'Priority support', 'Advanced reports'],
-    maxProducts: 5000,
-    maxUsers: 5,
-    supportLevel: 'standard',
+    id: 2,
+    shopName: 'Fashion Hub',
+    plan: 'Standard Plan',
+    status: 'active',
+    nextBilling: '2025-06-15',
+    amount: 49.99,
   },
   {
-    id: 'premium',
-    name: 'Premium Plan',
-    price: 99.99,
-    billingCycle: 'monthly',
-    features: ['Unlimited products', 'Unlimited staff accounts', '24/7 support', 'Custom reports'],
-    maxProducts: -1,
-    maxUsers: -1,
-    supportLevel: 'premium',
+    id: 3,
+    shopName: 'Local Crafts',
+    plan: 'Basic Plan',
+    status: 'expired',
+    nextBilling: '2025-05-20',
+    amount: 29.99,
   },
 ];
 
 export default function SubscriptionsPage() {
+  const { plans, addPlan, updatePlan, deletePlan, togglePlanStatus } = useSubscriptionPlans();
+  const [activeSubscriptions] = useState<ActiveSubscription[]>(mockActiveSubscriptions);
+  
+  // Modal states
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  
+  // Selected items
+  const [planToEdit, setPlanToEdit] = useState<SubscriptionPlan | null>(null);
+  const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
+
+  const handleCreatePlan = useCallback((newPlan: SubscriptionPlan) => {
+    addPlan(newPlan);
+  }, [addPlan]);
+
+  const handleEditPlan = useCallback((plan: SubscriptionPlan) => {
+    setPlanToEdit(plan);
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleUpdatePlan = useCallback((updatedPlan: SubscriptionPlan) => {
+    updatePlan(updatedPlan);
+    setPlanToEdit(null);
+    setIsEditModalOpen(false);
+  }, [updatePlan]);
+
+  const handleViewPlan = useCallback((plan: SubscriptionPlan) => {
+    console.log('View plan:', plan);
+    // TODO: Implement view plan functionality (could open a read-only modal)
+  }, []);
+
+  const handleToggleStatus = useCallback((planId: string) => {
+    togglePlanStatus(planId);
+  }, [togglePlanStatus]);
+
+  const handleDeletePlan = useCallback((planId: string) => {
+    const planToDelete = plans.find(p => p.id === planId);
+    if (planToDelete) {
+      setPlanToDelete(planToDelete);
+      setIsDeleteModalOpen(true);
+    }
+  }, [plans]);
+
+  const confirmDeletePlan = useCallback(() => {
+    if (planToDelete) {
+      deletePlan(planToDelete.id);
+      setPlanToDelete(null);
+      setIsDeleteModalOpen(false);
+    }
+  }, [planToDelete, deletePlan]);
+
+  const handleCloseEditModal = useCallback(() => {
+    setPlanToEdit(null);
+    setIsEditModalOpen(false);
+  }, []);
+
+  const handleCloseDeleteModal = useCallback(() => {
+    setPlanToDelete(null);
+    setIsDeleteModalOpen(false);
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Subscription Plans</h1>
-        <Button>
+    <div className="space-y-6 p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            Subscription Plans
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your subscription plans and active subscriptions
+          </p>
+        </div>
+        
+        <Button 
+          onClick={() => setIsCreateModalOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4 mr-2" />
           Create New Plan
         </Button>
       </div>
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-3">
-        {subscriptionPlans.map((plan) => (
-          <Card key={plan.id} className="relative">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                {plan.name}
-                <Badge variant={plan.id === 'premium' ? 'default' : 'secondary'}>
-                  ${plan.price}/mo
-                </Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2 mb-6">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-sm">
-                    <span className="mr-2">•</span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <Button className="w-full" variant={plan.id === 'premium' ? 'default' : 'outline'}>
-                <CreditCard className="h-4 w-4 mr-2" />
-                Edit Plan
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <SubscriptionPlansGrid
+        plans={plans}
+        onEditPlan={handleEditPlan}
+        onViewPlan={handleViewPlan}
+        onToggleStatus={handleToggleStatus}
+        onDeletePlan={handleDeletePlan}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Active Subscriptions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Shop Name</TableHead>
-                <TableHead>Plan</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Next Billing</TableHead>
-                <TableHead>Amount</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {/* Add mock subscription data here */}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+      <SubscriptionsTable subscriptions={activeSubscriptions} />
+
+      {/* Modals */}
+      <CreatePlanModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCreatePlan={handleCreatePlan}
+      />
+
+      <EditPlanModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onUpdatePlan={handleUpdatePlan}
+        planToEdit={planToEdit}
+      />
+
+      <DeleteConfirmModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        onConfirm={confirmDeletePlan}
+        planToDelete={planToDelete}
+      />
     </div>
   );
 }

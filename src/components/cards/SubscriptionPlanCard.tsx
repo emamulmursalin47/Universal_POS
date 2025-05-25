@@ -3,22 +3,35 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Users, Package, Headphones, Edit, Eye } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Users, Package, Headphones, Edit, Eye, MoreVertical, Power, Trash2 } from 'lucide-react';
 import { SubscriptionPlan } from '../../types/subscription';
 
 interface PlanCardProps {
   plan: SubscriptionPlan;
   onEdit: (plan: SubscriptionPlan) => void;
   onView: (plan: SubscriptionPlan) => void;
+  onToggleStatus: (planId: string) => void;
+  onDelete: (planId: string) => void;
 }
 
 const getPlanIcon = (supportLevel: SubscriptionPlan['supportLevel']) => {
-  const iconMap = {
-    premium: <Headphones className="h-4 w-4" />,
-    standard: <Users className="h-4 w-4" />,
-    basic: <Package className="h-4 w-4" />,
+  const iconProps = {
+    className: "h-5 w-5",
+    style: { 
+      display: 'inline-block',
+      verticalAlign: 'middle',
+      fill: 'currentColor',
+      stroke: 'currentColor'
+    }
   };
-  return iconMap[supportLevel];
+  
+  const iconMap = {
+    premium: <Headphones {...iconProps} />,
+    standard: <Users {...iconProps} />,
+    basic: <Package {...iconProps} />,
+  };
+  return iconMap[supportLevel] || <Package {...iconProps} />;
 };
 
 const getBillingCycleLabel = (cycle: SubscriptionPlan['billingCycle']) => {
@@ -30,16 +43,29 @@ const getBillingCycleLabel = (cycle: SubscriptionPlan['billingCycle']) => {
   return labelMap[cycle];
 };
 
-export const PlanCard: React.FC<PlanCardProps> = ({ plan, onEdit, onView }) => {
+export const PlanCard: React.FC<PlanCardProps> = ({ 
+  plan, 
+  onEdit, 
+  onView, 
+  onToggleStatus, 
+  onDelete 
+}) => {
   const isPremium = plan.id === 'premium';
 
   return (
-    <Card className="relative hover:shadow-lg transition-shadow">
+    <Card className={`relative hover:shadow-lg transition-shadow ${!plan.isEnabled ? 'opacity-60' : ''}`}>
       <CardHeader className="pb-4">
         <CardTitle className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            {getPlanIcon(plan.supportLevel)}
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0">
+              {getPlanIcon(plan.supportLevel)}
+            </div>
             <span className="text-lg font-semibold">{plan.name}</span>
+            {!plan.isEnabled && (
+              <Badge variant="secondary" className="text-xs">
+                Disabled
+              </Badge>
+            )}
           </div>
           <Badge variant={isPremium ? 'default' : 'secondary'} className="shrink-0">
             ${plan.price}/{getBillingCycleLabel(plan.billingCycle)}
@@ -53,7 +79,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, onEdit, onView }) => {
         <ul className="space-y-2">
           {plan.features.map((feature, index) => (
             <li key={index} className="flex items-start text-sm">
-              <span className="mr-2 mt-1 h-1 w-1 bg-current rounded-full shrink-0" />
+              <span className="mr-3 mt-2 h-1.5 w-1.5 bg-current rounded-full shrink-0" />
               <span>{feature}</span>
             </li>
           ))}
@@ -76,6 +102,27 @@ export const PlanCard: React.FC<PlanCardProps> = ({ plan, onEdit, onView }) => {
           <Button variant="outline" size="icon" onClick={() => onView(plan)}>
             <Eye className="h-4 w-4" />
           </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => onToggleStatus(plan.id)}>
+                <Power className="h-4 w-4 mr-2" />
+                {plan.isEnabled ? 'Disable' : 'Enable'}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => onDelete(plan.id)}
+                className="text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </CardContent>
     </Card>

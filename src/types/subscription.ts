@@ -1,4 +1,4 @@
-// types/subscription.ts
+
 export interface SubscriptionPlan {
   id: string;
   name: string;
@@ -9,6 +9,9 @@ export interface SubscriptionPlan {
   maxUsers: number; // -1 for unlimited
   supportLevel: 'basic' | 'standard' | 'premium';
   description?: string;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ActiveSubscription {
@@ -29,4 +32,9 @@ export interface CreatePlanFormData {
   maxProducts: string;
   maxUsers: string;
   supportLevel: 'basic' | 'standard' | 'premium';
+}
+
+export interface EditPlanFormData extends CreatePlanFormData {
+  id: string;
+  isEnabled: boolean;
 }
