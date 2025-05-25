@@ -92,17 +92,19 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
+      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
           <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-blue-600" />
-            <h2 className="text-lg font-semibold text-gray-900">Add New Shop</h2>
+            <Building2 className="h-5 w-5 text-blue-600 flex-shrink-0" />
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
+              Add New Shop
+            </h2>
           </div>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-2"
             disabled={isSubmitting}
             aria-label="Close modal"
           >
@@ -111,11 +113,11 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
         </div>
         
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6">
-          <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Shop Name */}
             <div className="space-y-2">
-              <label htmlFor="shop-name" className="text-sm font-medium text-gray-700">
+              <label htmlFor="shop-name" className="block text-sm font-medium text-gray-700">
                 Shop Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -126,7 +128,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
                 onChange={(e: ChangeEvent<HTMLInputElement>) => 
                   handleInputChange('name', e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
                   errors.name ? 'border-red-500' : 'border-gray-300'
                 }`}
                 required
@@ -139,7 +141,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
             
             {/* Email */}
             <div className="space-y-2">
-              <label htmlFor="shop-email" className="text-sm font-medium text-gray-700">
+              <label htmlFor="shop-email" className="block text-sm font-medium text-gray-700">
                 Email <span className="text-red-500">*</span>
               </label>
               <input
@@ -150,7 +152,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
                 onChange={(e: ChangeEvent<HTMLInputElement>) => 
                   handleInputChange('email', e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
                   errors.email ? 'border-red-500' : 'border-gray-300'
                 }`}
                 required
@@ -163,7 +165,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
             
             {/* Contact */}
             <div className="space-y-2">
-              <label htmlFor="shop-contact" className="text-sm font-medium text-gray-700">
+              <label htmlFor="shop-contact" className="block text-sm font-medium text-gray-700">
                 Contact Number <span className="text-red-500">*</span>
               </label>
               <input
@@ -174,7 +176,7 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
                 onChange={(e: ChangeEvent<HTMLInputElement>) => 
                   handleInputChange('contact', e.target.value)
                 }
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
                   errors.contact ? 'border-red-500' : 'border-gray-300'
                 }`}
                 required
@@ -187,14 +189,14 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
             
             {/* Subscription Plan */}
             <div className="space-y-2">
-              <label htmlFor="subscription-plan" className="text-sm font-medium text-gray-700">
+              <label htmlFor="subscription-plan" className="block text-sm font-medium text-gray-700">
                 Subscription Plan
               </label>
               <select 
                 id="subscription-plan"
                 value={formData.subscriptionPlan} 
                 onChange={handleSelectChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
                 disabled={isSubmitting}
               >
                 <option value="basic">Basic - $9.99/month</option>
@@ -204,18 +206,18 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
             </div>
             
             {/* Action Buttons */}
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6">
               <button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700 disabled:opacity-50"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700 disabled:opacity-50 text-base sm:text-sm font-medium"
                 disabled={isSubmitting}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-sm font-medium"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

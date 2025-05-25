@@ -17,6 +17,7 @@ interface Shop {
   subscriptionPlan: string;
   subscriptionStatus: string;
   createdAt: string;
+  deadline: string;
 }
 
 interface ShopFormData {
@@ -24,6 +25,7 @@ interface ShopFormData {
   email: string;
   contact: string;
   subscriptionPlan: string;
+  deadline: string;
 }
 
 // Mock data
@@ -35,7 +37,8 @@ const MOCK_SHOPS: Shop[] = [
     contact: "+1 (555) 123-4567",
     subscriptionPlan: "premium",
     subscriptionStatus: "active",
-    createdAt: "2024-01-15T00:00:00Z"
+    createdAt: "2024-01-15T00:00:00Z",
+    deadline: "2024-07-15T00:00:00Z"
   },
   {
     id: 2,
@@ -44,7 +47,8 @@ const MOCK_SHOPS: Shop[] = [
     contact: "+1 (555) 987-6543",
     subscriptionPlan: "basic",
     subscriptionStatus: "active",
-    createdAt: "2024-02-20T00:00:00Z"
+    createdAt: "2024-02-20T00:00:00Z",
+    deadline: "2024-08-20T00:00:00Z"
   },
   {
     id: 3,
@@ -53,7 +57,8 @@ const MOCK_SHOPS: Shop[] = [
     contact: "+1 (555) 456-7890",
     subscriptionPlan: "standard",
     subscriptionStatus: "expired",
-    createdAt: "2024-03-10T00:00:00Z"
+    createdAt: "2024-03-10T00:00:00Z",
+    deadline: "2024-06-10T00:00:00Z"
   }
 ];
 
@@ -67,7 +72,8 @@ const AddShopModal: React.FC<{
     name: '',
     email: '',
     contact: '',
-    subscriptionPlan: 'basic'
+    subscriptionPlan: 'basic',
+    deadline: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,7 +85,7 @@ const AddShopModal: React.FC<{
       createdAt: new Date().toISOString()
     };
     onAddShop(newShop);
-    setFormData({ name: '', email: '', contact: '', subscriptionPlan: 'basic' });
+    setFormData({ name: '', email: '', contact: '', subscriptionPlan: 'basic', deadline: '' });
     onClose();
   };
 
@@ -141,6 +147,17 @@ const AddShopModal: React.FC<{
             </Select>
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="deadline">Subscription Deadline</Label>
+            <Input
+              id="deadline"
+              type="date"
+              value={formData.deadline}
+              onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
+              required
+            />
+          </div>
+          
           <div className="flex justify-end space-x-2 pt-4">
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
@@ -158,6 +175,18 @@ const AddShopModal: React.FC<{
 
 // Shop Card Component for Mobile
 const ShopCard: React.FC<{ shop: Shop }> = ({ shop }) => {
+  const getDeadlineStatus = (deadline: string) => {
+    const deadlineDate = new Date(deadline);
+    const now = new Date();
+    const daysUntilDeadline = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilDeadline < 0) return { status: 'expired', color: 'text-red-600', text: 'Expired' };
+    if (daysUntilDeadline <= 7) return { status: 'warning', color: 'text-yellow-600', text: `${daysUntilDeadline} days left` };
+    return { status: 'active', color: 'text-green-600', text: `${daysUntilDeadline} days left` };
+  };
+
+  const deadlineInfo = getDeadlineStatus(shop.deadline);
+
   return (
     <Card className="mb-4">
       <CardContent className="p-4">
@@ -192,6 +221,12 @@ const ShopCard: React.FC<{ shop: Shop }> = ({ shop }) => {
             <Calendar className="h-4 w-4 mr-2" />
             Created: {new Date(shop.createdAt).toLocaleDateString()}
           </div>
+          <div className="flex items-center">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span className={deadlineInfo.color}>
+              Deadline: {new Date(shop.deadline).toLocaleDateString()} ({deadlineInfo.text})
+            </span>
+          </div>
           <div className="mt-2">
             <span className="text-xs bg-gray-100 px-2 py-1 rounded capitalize">
               {shop.subscriptionPlan} Plan
@@ -216,6 +251,16 @@ export default function ShopsPage() {
 
   const handleAddShop = (newShop: Shop) => {
     setShops(prev => [...prev, newShop]);
+  };
+
+  const getDeadlineStatus = (deadline: string) => {
+    const deadlineDate = new Date(deadline);
+    const now = new Date();
+    const daysUntilDeadline = Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilDeadline < 0) return { status: 'expired', color: 'text-red-600', text: 'Expired' };
+    if (daysUntilDeadline <= 7) return { status: 'warning', color: 'text-yellow-600', text: `${daysUntilDeadline} days left` };
+    return { status: 'active', color: 'text-green-600', text: `${daysUntilDeadline} days left` };
   };
 
   return (
@@ -254,37 +299,49 @@ export default function ShopsPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Subscription</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Deadline</TableHead>
                   <TableHead>Created</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredShops.map((shop) => (
-                  <TableRow key={shop.id}>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                          <Building2 className="h-4 w-4 text-primary" />
+                {filteredShops.map((shop) => {
+                  const deadlineInfo = getDeadlineStatus(shop.deadline);
+                  return (
+                    <TableRow key={shop.id}>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                            <Building2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <div>
+                            <div className="font-medium">{shop.name}</div>
+                            <div className="text-sm text-muted-foreground">{shop.email}</div>
+                          </div>
                         </div>
+                      </TableCell>
+                      <TableCell>{shop.contact}</TableCell>
+                      <TableCell className="capitalize">{shop.subscriptionPlan}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          shop.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
+                          shop.subscriptionStatus === 'expired' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {shop.subscriptionStatus}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <div>
-                          <div className="font-medium">{shop.name}</div>
-                          <div className="text-sm text-muted-foreground">{shop.email}</div>
+                          <div className="text-sm">{new Date(shop.deadline).toLocaleDateString()}</div>
+                          <div className={`text-xs ${deadlineInfo.color}`}>
+                            {deadlineInfo.text}
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{shop.contact}</TableCell>
-                    <TableCell className="capitalize">{shop.subscriptionPlan}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        shop.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                        shop.subscriptionStatus === 'expired' ? 'bg-red-100 text-red-800' :
-                        'bg-yellow-100 text-yellow-800'
-                      }`}>
-                        {shop.subscriptionStatus}
-                      </span>
-                    </TableCell>
-                    <TableCell>{new Date(shop.createdAt).toLocaleDateString()}</TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{new Date(shop.createdAt).toLocaleDateString()}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
