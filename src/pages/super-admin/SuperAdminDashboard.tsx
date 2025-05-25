@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/statistics/StatsCard';
-import { Building2, Users, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Building2,  CheckCircle, XCircle, Clock } from 'lucide-react';
 import { MOCK_SHOPS } from '@/lib/constants';
 
 export default function SuperAdminDashboard() {
