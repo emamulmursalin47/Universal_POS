@@ -1,7 +1,6 @@
 // types/shop.ts
-
-export type SubscriptionStatus = 'active' | 'expired' | 'trial';
 export type SubscriptionPlan = 'basic' | 'standard' | 'premium';
+export type SubscriptionStatus = 'active' | 'expired' | 'trial';
 
 export interface Shop {
   id: number;
@@ -10,34 +9,29 @@ export interface Shop {
   contact: string;
   subscriptionPlan: SubscriptionPlan;
   subscriptionStatus: SubscriptionStatus;
+  isActive: boolean;
   createdAt: string;
+  deadline: string;
+  lastUpdated?: string;
 }
 
 export interface ShopFormData {
   name: string;
   email: string;
   contact: string;
-  subscriptionPlan: SubscriptionPlan;
+  subscriptionPlan: string;
+  deadline: string;
 }
 
-export interface ShopStats {
-  total: number;
-  active: number;
-  trial: number;
-  expired: number;
-  premium: number;
-  standard: number;
-  basic: number;
-}
-
-export interface AddShopModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onAddShop: (shop: Shop) => void;
+export interface UpdateSubscriptionData {
+  subscriptionPlan: string;
+  deadline: string;
 }
 
 export interface ShopCardProps {
   shop: Shop;
   onEdit: (shop: Shop) => void;
-  onDelete: (shopId: number) => void;
+  onDelete: (id: number) => void;
+  onToggleActive: (id: number, isActive: boolean) => void;
+  onUpdateSubscription: (shop: Shop) => void;
 }
