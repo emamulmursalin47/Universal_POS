@@ -1,5 +1,5 @@
 // pages/ShopsPage.tsx (Fully Responsive)
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, TrendingUp, TrendingDown, Clock, Users } from 'lucide-react';
@@ -52,14 +52,14 @@ export default function ShopsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Main Container with responsive padding */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
         
         {/* Header Section - Responsive layout */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1 sm:space-y-2">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-gray-900">
+            <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold tracking-tight text-gray-900">
               Shop Management
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
@@ -71,7 +71,7 @@ export default function ShopsPage() {
           <Button 
             onClick={() => setIsAddModalOpen(true)} 
             size="lg"
-            className="w-full sm:w-auto h-10 sm:h-11 lg:h-12"
+        className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             <span className="sm:hidden">Add Shop</span>

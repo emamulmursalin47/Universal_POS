@@ -1,6 +1,7 @@
-// pages/SubscriptionsPage.tsx
-import  { useState, useCallback } from 'react';
+// pages/SubscriptionsPage.tsx (Styled to match ShopsPage)
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
 import { ActiveSubscription, SubscriptionPlan } from '@/types/subscription';
 import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
@@ -9,7 +10,6 @@ import { SubscriptionsTable } from '@/components/tables/SubscriptionTable';
 import { CreatePlanModal } from '@/components/modals/CreatePlanModal';
 import { EditPlanModal } from '@/components/modals/EditPlanModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
-
 
 const mockActiveSubscriptions: ActiveSubscription[] = [
   {
@@ -102,35 +102,59 @@ export default function SubscriptionsPage() {
   }, []);
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Subscription Plans
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your subscription plans and active subscriptions
-          </p>
-        </div>
+    <div className="min-h-screen bg-white">
+      {/* Main Container with responsive padding */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
         
-        <Button 
-          onClick={() => setIsCreateModalOpen(true)}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create New Plan
-        </Button>
+        {/* Header Section - Responsive layout */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold tracking-tight text-gray-900">
+              Subscription Plans
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Manage your subscription plans and active subscriptions
+            </p>
+          </div>
+          
+          {/* Add Button - Full width on mobile */}
+          <Button 
+            onClick={() => setIsCreateModalOpen(true)}
+            size="lg"
+            className="w-full sm:w-auto"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span className="sm:hidden">Create Plan</span>
+            <span className="hidden sm:inline">Create New Plan</span>
+          </Button>
+        </div>
+
+        {/* Subscription Plans Section */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl">Available Plans</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SubscriptionPlansGrid
+              plans={plans}
+              onEditPlan={handleEditPlan}
+              onViewPlan={handleViewPlan}
+              onToggleStatus={handleToggleStatus}
+              onDeletePlan={handleDeletePlan}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Active Subscriptions Section */}
+        <Card className="shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl">Active Subscriptions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SubscriptionsTable subscriptions={activeSubscriptions} />
+          </CardContent>
+        </Card>
       </div>
-
-      <SubscriptionPlansGrid
-        plans={plans}
-        onEditPlan={handleEditPlan}
-        onViewPlan={handleViewPlan}
-        onToggleStatus={handleToggleStatus}
-        onDeletePlan={handleDeletePlan}
-      />
-
-      <SubscriptionsTable subscriptions={activeSubscriptions} />
 
       {/* Modals */}
       <CreatePlanModal
