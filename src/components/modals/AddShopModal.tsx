@@ -1,61 +1,48 @@
-// components/AddShopModal.tsx
+/* eslint-disable @typescript-eslint/ban-ts-comment */
+// components/shop/modals/AddShopModal.tsx (Responsive)
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Building2, Plus } from 'lucide-react';
+import { Shop, ShopFormData } from '@/types/shop';
+import { ResponsiveModal } from './ResponsiveModal';
 
-import React, { useState, FormEvent, ChangeEvent } from 'react';
-import { Building2, Plus, X } from 'lucide-react';
-import { AddShopModalProps, Shop, ShopFormData, SubscriptionPlan } from '@/types/shop';
+interface AddShopModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAddShop: (shop: Shop) => void;
+}
 
-
-const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop }) => {
+export const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop }) => {
   const [formData, setFormData] = useState<ShopFormData>({
     name: '',
     email: '',
     contact: '',
-    subscriptionPlan: 'basic'
+    subscriptionPlan: 'basic',
+    deadline: ''
   });
 
-  const [errors, setErrors] = useState<Partial<ShopFormData>>({});
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const validateForm = (): boolean => {
-    const newErrors: Partial<ShopFormData> = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Shop name is required';
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    if (!formData.contact.trim()) {
-      newErrors.contact = 'Contact number is required';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
-
     setIsSubmitting(true);
-
+    
     try {
+        //@ts-ignore
       const newShop: Shop = {
         id: Date.now(),
         ...formData,
         subscriptionStatus: 'active',
+        isActive: true,
         createdAt: new Date().toISOString()
       };
       
-      await onAddShop(newShop);
-      handleClose();
+      onAddShop(newShop);
+      setFormData({ name: '', email: '', contact: '', subscriptionPlan: 'basic', deadline: '' });
+      onClose();
     } catch (error) {
       console.error('Error adding shop:', error);
     } finally {
@@ -63,181 +50,140 @@ const AddShopModal: React.FC<AddShopModalProps> = ({ isOpen, onClose, onAddShop 
     }
   };
 
-  const handleInputChange = (field: keyof ShopFormData, value: string): void => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData({ name: '', email: '', contact: '', subscriptionPlan: 'basic', deadline: '' });
+      onClose();
     }
   };
 
-  const handleSelectChange = (e: ChangeEvent<HTMLSelectElement>): void => {
-    const value = e.target.value as SubscriptionPlan;
-    handleInputChange('subscriptionPlan', value);
-  };
-
-  const handleClose = (): void => {
-    setFormData({ 
-      name: '', 
-      email: '', 
-      contact: '', 
-      subscriptionPlan: 'basic' 
-    });
-    setErrors({});
-    setIsSubmitting(false);
-    onClose();
-  };
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-3 sm:p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
-          <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-blue-600 flex-shrink-0" />
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 truncate">
-              Add New Shop
-            </h2>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0 ml-2"
+    <ResponsiveModal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title="Add New Shop"
+      icon={<Building2 className="h-5 w-5" />}
+      maxWidth="md"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+        {/* Shop Name */}
+        <div className="space-y-2">
+          <Label htmlFor="shop-name" className="text-sm sm:text-base font-medium">
+            Shop Name *
+          </Label>
+          <Input
+            id="shop-name"
+            placeholder="Enter shop name"
+            value={formData.name}
+            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+            className="h-10 sm:h-11"
+            required
             disabled={isSubmitting}
-            aria-label="Close modal"
-          >
-            <X className="h-5 w-5 text-gray-500" />
-          </button>
+          />
         </div>
         
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6">
-          <div className="space-y-4 sm:space-y-6">
-            {/* Shop Name */}
-            <div className="space-y-2">
-              <label htmlFor="shop-name" className="block text-sm font-medium text-gray-700">
-                Shop Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="shop-name"
-                type="text"
-                placeholder="Enter shop name"
-                value={formData.name}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                  handleInputChange('name', e.target.value)
-                }
-                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
-                  errors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
-                required
-                disabled={isSubmitting}
-              />
-              {errors.name && (
-                <p className="text-sm text-red-600">{errors.name}</p>
-              )}
-            </div>
-            
-            {/* Email */}
-            <div className="space-y-2">
-              <label htmlFor="shop-email" className="block text-sm font-medium text-gray-700">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="shop-email"
-                type="email"
-                placeholder="Enter email address"
-                value={formData.email}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                  handleInputChange('email', e.target.value)
-                }
-                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
-                  errors.email ? 'border-red-500' : 'border-gray-300'
-                }`}
-                required
-                disabled={isSubmitting}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600">{errors.email}</p>
-              )}
-            </div>
-            
-            {/* Contact */}
-            <div className="space-y-2">
-              <label htmlFor="shop-contact" className="block text-sm font-medium text-gray-700">
-                Contact Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                id="shop-contact"
-                type="text"
-                placeholder="Enter contact number"
-                value={formData.contact}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => 
-                  handleInputChange('contact', e.target.value)
-                }
-                className={`w-full px-3 py-2.5 sm:py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm ${
-                  errors.contact ? 'border-red-500' : 'border-gray-300'
-                }`}
-                required
-                disabled={isSubmitting}
-              />
-              {errors.contact && (
-                <p className="text-sm text-red-600">{errors.contact}</p>
-              )}
-            </div>
-            
-            {/* Subscription Plan */}
-            <div className="space-y-2">
-              <label htmlFor="subscription-plan" className="block text-sm font-medium text-gray-700">
-                Subscription Plan
-              </label>
-              <select 
-                id="subscription-plan"
-                value={formData.subscriptionPlan} 
-                onChange={handleSelectChange}
-                className="w-full px-3 py-2.5 sm:py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base sm:text-sm"
-                disabled={isSubmitting}
-              >
-                <option value="basic">Basic - $9.99/month</option>
-                <option value="standard">Standard - $19.99/month</option>
-                <option value="premium">Premium - $39.99/month</option>
-              </select>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-gray-700 disabled:opacity-50 text-base sm:text-sm font-medium"
-                disabled={isSubmitting}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-base sm:text-sm font-medium"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    Adding...
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" />
-                    Add Shop
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+        {/* Email */}
+        <div className="space-y-2">
+          <Label htmlFor="shop-email" className="text-sm sm:text-base font-medium">
+            Email Address *
+          </Label>
+          <Input
+            id="shop-email"
+            type="email"
+            placeholder="Enter email address"
+            value={formData.email}
+            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+            className="h-10 sm:h-11"
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+        
+        {/* Contact Number */}
+        <div className="space-y-2">
+          <Label htmlFor="shop-contact" className="text-sm sm:text-base font-medium">
+            Contact Number *
+          </Label>
+          <Input
+            id="shop-contact"
+            type="tel"
+            placeholder="Enter contact number"
+            value={formData.contact}
+            onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
+            className="h-10 sm:h-11"
+            required
+            disabled={isSubmitting}
+          />
+        </div>
+        
+        {/* Subscription Plan - Full width on mobile */}
+        <div className="space-y-2">
+          <Label htmlFor="subscription-plan" className="text-sm sm:text-base font-medium">
+            Subscription Plan *
+          </Label>
+          <Select 
+            value={formData.subscriptionPlan} 
+            onValueChange={(value) => setFormData(prev => ({ ...prev, subscriptionPlan: value }))}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger className="h-10 sm:h-11">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="basic">Basic Plan</SelectItem>
+              <SelectItem value="standard">Standard Plan</SelectItem>
+              <SelectItem value="premium">Premium Plan</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Subscription Deadline */}
+        <div className="space-y-2">
+          <Label htmlFor="deadline" className="text-sm sm:text-base font-medium">
+            Subscription Deadline *
+          </Label>
+          <Input
+            id="deadline"
+            type="date"
+            value={formData.deadline}
+            onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
+            className="h-10 sm:h-11"
+            required
+            disabled={isSubmitting}
+            min={new Date().toISOString().split('T')[0]} // Prevent past dates
+          />
+        </div>
+        
+        {/* Action Buttons - Stack on mobile */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end pt-4 sm:pt-6">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleClose}
+            disabled={isSubmitting}
+            className="order-2 sm:order-1 h-10 sm:h-11"
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="submit"
+            disabled={isSubmitting}
+            className="order-1 sm:order-2 h-10 sm:h-11"
+          >
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Adding...
+              </>
+            ) : (
+              <>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Shop
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </ResponsiveModal>
   );
 };
-
-export default AddShopModal;
