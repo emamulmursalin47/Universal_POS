@@ -1,18 +1,16 @@
-// pages/ShopsPage.tsx (Fully Responsive)
+// pages/ShopsPage.tsx
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, TrendingUp, TrendingDown, Clock, Users } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Clock, Users, Filter } from 'lucide-react';
 
 // Components
 import { ShopCard } from '@/components/shop/ShopCard';
 import { ShopTable } from '@/components/shop/ShopTable';
 import { ShopSearch } from '@/components/shop/ShopSearch';
 
-
 // Hooks and Data
 import { useShopActions } from '@/hooks/useShopActions';
-
 import { Shop } from '@/types/shop';
 import { MOCK_SHOPS } from '@/data/MockShops';
 import { AddShopModal } from '@/components/modals/AddShopModal';
@@ -21,6 +19,7 @@ import { UpdateSubscriptionModal } from '@/components/modals/UpdateSubscriptionM
 
 export default function ShopsPage() {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   const [isUpdateSubscriptionModalOpen, setIsUpdateSubscriptionModalOpen] = useState<boolean>(false);
@@ -28,17 +27,34 @@ export default function ShopsPage() {
   
   const { shops, addShop, updateShop, deleteShop, toggleActive } = useShopActions(MOCK_SHOPS);
   
-  const filteredShops = shops.filter(shop => 
-    shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    shop.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Enhanced filtering logic
+  const filteredShops = shops.filter(shop => {
+    const matchesSearch = 
+      shop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shop.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shop.ownerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      shop.address.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = 
+      statusFilter === 'all' ||
+      (statusFilter === 'active' && shop.isActive && shop.subscriptionStatus === 'active') ||
+      (statusFilter === 'inactive' && !shop.isActive) ||
+      (statusFilter === 'expired' && shop.subscriptionStatus === 'expired') ||
+      (statusFilter === 'trial' && shop.subscriptionStatus === 'trial');
+    
+    return matchesSearch && matchesStatus;
+  });
 
-  // Calculate statistics
+  // Calculate comprehensive statistics
   const stats = {
     total: shops.length,
     active: shops.filter(shop => shop.isActive && shop.subscriptionStatus === 'active').length,
     expired: shops.filter(shop => shop.subscriptionStatus === 'expired').length,
-    inactive: shops.filter(shop => !shop.isActive).length
+    inactive: shops.filter(shop => !shop.isActive).length,
+    trial: shops.filter(shop => shop.subscriptionStatus === 'trial').length,
+    premium: shops.filter(shop => shop.subscriptionPlan === 'premium').length,
+    standard: shops.filter(shop => shop.subscriptionPlan === 'standard').length,
+    basic: shops.filter(shop => shop.subscriptionPlan === 'basic').length
   };
 
   const handleEditShop = (shop: Shop) => {
@@ -51,27 +67,32 @@ export default function ShopsPage() {
     setIsUpdateSubscriptionModalOpen(true);
   };
 
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Main Container with responsive padding */}
+      {/* Main Container - Updated padding to match SubscriptionsPage */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
         
-        {/* Header Section - Responsive layout */}
+        {/* Header Section - Updated spacing and text sizes */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-1 sm:space-y-2">
             <h1 className="text-2xl sm:text-3xl lg:text-3xl font-bold tracking-tight text-gray-900">
               Shop Management
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Manage your shops, subscriptions, and customer information
+              Comprehensive management system for shops, subscriptions, and customer information
             </p>
           </div>
           
-          {/* Add Button - Full width on mobile */}
+          {/* Add Button - Updated to match SubscriptionsPage style */}
           <Button 
             onClick={() => setIsAddModalOpen(true)} 
             size="lg"
-        className="w-full sm:w-auto"
+            className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             <span className="sm:hidden">Add Shop</span>
@@ -79,115 +100,201 @@ export default function ShopsPage() {
           </Button>
         </div>
 
-        {/* Stats Cards - Responsive grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+        {/* Enhanced Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6">
+          {/* Primary Stats */}
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-900">
                     {stats.total}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
                     Total Shops
                   </p>
                 </div>
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
+                <Users className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-green-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-600">
                     {stats.active}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
                     Active
                   </p>
                 </div>
-                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-green-600" />
+                <TrendingUp className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-red-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-red-600">
                     {stats.expired}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
                     Expired
                   </p>
                 </div>
-                <Clock className="h-6 w-6 sm:h-8 sm:w-8 text-red-600" />
+                <Clock className="h-8 w-8 text-red-600" />
               </div>
             </CardContent>
           </Card>
           
-          <Card className="hover:shadow-md transition-shadow">
-            <CardContent className="p-3 sm:p-4 lg:p-6">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-gray-500">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-gray-600">
                     {stats.inactive}
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
                     Inactive
                   </p>
                 </div>
-                <TrendingDown className="h-6 w-6 sm:h-8 sm:w-8 text-gray-600" />
+                <TrendingDown className="h-8 w-8 text-gray-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Additional Stats for larger screens */}
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-500 hidden xl:block">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-bold text-yellow-600">
+                    {stats.trial}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
+                    Trial
+                  </p>
+                </div>
+                <Clock className="h-8 w-8 text-yellow-600" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 hidden xl:block">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600">
+                    {stats.premium}
+                  </div>
+                  <p className="text-sm text-gray-600 mt-1 font-medium">
+                    Premium
+                  </p>
+                </div>
+                <TrendingUp className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Card */}
+        {/* Main Content Card - Updated shadow and header styling */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg sm:text-xl lg:text-2xl">All Shops</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 sm:space-y-6">
-            
-            {/* Search Section */}
-            <div className="space-y-3">
-              <ShopSearch 
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-              />
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                All Shops ({filteredShops.length})
+              </CardTitle>
               
-              {/* Results Count */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Showing {filteredShops.length} of {shops.length} shops
-                </p>
+              {/* Quick Stats Pills */}
+              <div className="flex flex-wrap gap-2">
+                <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                  {stats.active} Active
+                </div>
+                <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                  {stats.expired} Expired
+                </div>
+                <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                  {stats.trial} Trial
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            
+            {/* Enhanced Search and Filter Section */}
+            <div className="space-y-4">
+              <div className="flex flex-col lg:flex-row gap-4">
+                {/* Search */}
+                <div className="flex-1">
+                  <ShopSearch 
+                    searchTerm={searchTerm}
+                    onSearchChange={setSearchTerm}
+                  />
+                </div>
                 
-                {/* Quick Filter Buttons - Mobile */}
+                {/* Status Filter */}
+                <div className="flex flex-col sm:flex-row gap-3 lg:w-auto">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="active">Active Only</option>
+                    <option value="inactive">Inactive Only</option>
+                    <option value="expired">Expired Only</option>
+                    <option value="trial">Trial Only</option>
+                  </select>
+                  
+                  {(searchTerm || statusFilter !== 'all') && (
+                    <Button
+                      variant="outline"
+                      onClick={clearFilters}
+                      className="px-4 py-2"
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Results Summary */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm text-gray-600">
+                <div>
+                  Showing <span className="font-semibold text-gray-900">{filteredShops.length}</span> of{' '}
+                  <span className="font-semibold text-gray-900">{shops.length}</span> shops
+                  {searchTerm && (
+                    <span> matching "<span className="font-medium text-blue-600">{searchTerm}</span>"</span>
+                  )}
+                </div>
+                
+                {/* Mobile Quick Filters */}
                 <div className="flex gap-2 sm:hidden">
                   <Button
-                    variant="outline"
+                    variant={statusFilter === 'all' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSearchTerm('')}
-                    className={`text-xs ${!searchTerm ? 'bg-primary/10' : ''}`}
+                    onClick={() => setStatusFilter('all')}
+                    className="text-xs"
                   >
                     All
                   </Button>
                   <Button
-                    variant="outline"
+                    variant={statusFilter === 'active' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSearchTerm('active')}
+                    onClick={() => setStatusFilter('active')}
                     className="text-xs"
                   >
                     Active
                   </Button>
                   <Button
-                    variant="outline"
+                    variant={statusFilter === 'expired' ? 'default' : 'outline'}
                     size="sm"
-                    onClick={() => setSearchTerm('expired')}
+                    onClick={() => setStatusFilter('expired')}
                     className="text-xs"
                   >
                     Expired
@@ -196,17 +303,19 @@ export default function ShopsPage() {
               </div>
             </div>
 
-            {/* Table Views - Responsive breakpoints */}
-            <ShopTable
-              shops={filteredShops}
-              onEdit={handleEditShop}
-              onDelete={deleteShop}
-              onToggleActive={toggleActive}
-              onUpdateSubscription={handleUpdateSubscription}
-            />
+            {/* Table Views for Desktop/Tablet */}
+            <div className="hidden sm:block">
+              <ShopTable
+                shops={filteredShops}
+                onEdit={handleEditShop}
+                onDelete={deleteShop}
+                onToggleActive={toggleActive}
+                onUpdateSubscription={handleUpdateSubscription}
+              />
+            </div>
 
             {/* Mobile Card View (< 640px) */}
-            <div className="sm:hidden space-y-3">
+            <div className="sm:hidden space-y-4">
               {filteredShops.length > 0 ? (
                 filteredShops.map((shop) => (
                   <ShopCard 
@@ -219,22 +328,27 @@ export default function ShopsPage() {
                   />
                 ))
               ) : (
-                <div className="text-center py-8 sm:py-12">
+                <div className="text-center py-12">
                   <div className="max-w-sm mx-auto">
-                    <div className="rounded-full bg-gray-100 h-12 w-12 mx-auto mb-4 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-gray-400" />
+                    <div className="rounded-full bg-gray-100 h-16 w-16 mx-auto mb-6 flex items-center justify-center">
+                      <Users className="h-8 w-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No shops found</h3>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {searchTerm 
-                        ? 'Try adjusting your search terms or clear the search to see all shops.'
-                        : 'Get started by adding your first shop.'
+                    <h3 className="text-xl font-semibold text-gray-900 mb-3">No shops found</h3>
+                    <p className="text-gray-600 mb-6">
+                      {searchTerm || statusFilter !== 'all'
+                        ? 'Try adjusting your search terms or filters to see more results.'
+                        : 'Get started by adding your first shop to begin managing your business.'
                       }
                     </p>
-                    {!searchTerm && (
-                      <Button onClick={() => setIsAddModalOpen(true)} size="sm">
+                    {(!searchTerm && statusFilter === 'all') && (
+                      <Button onClick={() => setIsAddModalOpen(true)}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Your First Shop
+                      </Button>
+                    )}
+                    {(searchTerm || statusFilter !== 'all') && (
+                      <Button onClick={clearFilters} variant="outline">
+                        Clear Filters
                       </Button>
                     )}
                   </div>
@@ -242,24 +356,29 @@ export default function ShopsPage() {
               )}
             </div>
 
-            {/* Empty State for Larger Screens */}
+            {/* Empty State for Desktop */}
             {filteredShops.length === 0 && (
-              <div className="hidden sm:block text-center py-12 lg:py-16">
+              <div className="hidden sm:block text-center py-16">
                 <div className="max-w-md mx-auto">
-                  <div className="rounded-full bg-gray-100 h-16 w-16 mx-auto mb-6 flex items-center justify-center">
-                    <Users className="h-8 w-8 text-gray-400" />
+                  <div className="rounded-full bg-gray-100 h-20 w-20 mx-auto mb-8 flex items-center justify-center">
+                    <Users className="h-10 w-10 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-medium text-gray-900 mb-3">No shops found</h3>
-                  <p className="text-base text-muted-foreground mb-6">
-                    {searchTerm 
-                      ? 'Try adjusting your search terms or clear the search to see all shops.'
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-4">No shops found</h3>
+                  <p className="text-lg text-gray-600 mb-8">
+                    {searchTerm || statusFilter !== 'all'
+                      ? 'Try adjusting your search terms or filters to see more results.'
                       : 'Get started by adding your first shop to begin managing your business.'
                     }
                   </p>
-                  {!searchTerm && (
+                  {(!searchTerm && statusFilter === 'all') ? (
                     <Button onClick={() => setIsAddModalOpen(true)} size="lg">
                       <Plus className="h-5 w-5 mr-2" />
                       Add Your First Shop
+                    </Button>
+                  ) : (
+                    <Button onClick={clearFilters} size="lg" variant="outline">
+                      <Filter className="h-5 w-5 mr-2" />
+                      Clear All Filters
                     </Button>
                   )}
                 </div>
