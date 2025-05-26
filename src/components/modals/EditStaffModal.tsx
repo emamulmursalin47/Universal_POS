@@ -1,19 +1,24 @@
-// components/AddStaffModal.tsx
-import React, { useState, useCallback } from 'react';
+// components/EditStaffModal.tsx
+import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { StaffFormData, StaffFormErrors } from '@/types/staff';
-import { generateStaffId, validateStaffForm } from '@/utils/staffUtiils';
+import { Staff, StaffFormData, StaffFormErrors } from '@/types/staff';
+import { validateStaffForm } from '@/utils/staffUtiils';
 import { STAFF_ROLES } from '@/constants/staff';
 
-
-interface AddStaffModalProps {
+interface EditStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (staffData: StaffFormData) => void;
+  staff: Staff | null;
+  onUpdate: (staff: Staff) => void;
 }
 
-const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }) => {
+const EditStaffModal: React.FC<EditStaffModalProps> = ({
+  isOpen,
+  onClose,
+  staff,
+  onUpdate
+}) => {
   const [formData, setFormData] = useState<StaffFormData>({
     id: '',
     name: '',
@@ -25,6 +30,19 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
 
   const [errors, setErrors] = useState<StaffFormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (staff && isOpen) {
+      setFormData({
+        id: staff.id,
+        name: staff.name,
+        email: staff.email,
+        role: staff.role,
+        loginId: staff.loginId,
+        password: staff.password
+      });
+    }
+  }, [staff, isOpen]);
 
   const handleInputChange = useCallback((field: keyof StaffFormData, value: string) => {
     setFormData(prev => ({
@@ -40,11 +58,6 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
     }
   }, [errors]);
 
-  const handleAutoGenerateId = useCallback(() => {
-    const newId = generateStaffId();
-    handleInputChange('id', newId);
-  }, [handleInputChange]);
-
   const handleSubmit = useCallback(async () => {
     const validationErrors = validateStaffForm(formData);
     
@@ -58,70 +71,47 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      onSave(formData);
+      const updatedStaff: Staff = {
+        ...staff!,
+        name: formData.name,
+        email: formData.email,
+        role: formData.role as Staff['role'],
+        loginId: formData.loginId,
+        password: formData.password,
+        updatedAt: new Date()
+      };
       
-      setFormData({
-        id: '',
-        name: '',
-        role: '',
-        loginId: '',
-        password: '',
-        email: ''
-      });
-      setErrors({});
+      onUpdate(updatedStaff);
       onClose();
     } catch (error) {
-      console.error('Error saving staff member:', error);
+      console.error('Error updating staff member:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [formData, onSave, onClose]);
+  }, [formData, staff, onUpdate, onClose]);
 
   const handleClose = useCallback(() => {
-    setFormData({
-      id: '',
-      name: '',
-      role: '',
-      loginId: '',
-      password: '',
-      email: ''
-    });
     setErrors({});
     onClose();
   }, [onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !staff) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <div className="p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-6">Add New Staff Member</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-6">Edit Staff Member</h2>
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Staff ID <span className="text-red-500">*</span>
-                </label>
-                <div className="flex space-x-2">
-                  <Input
-                    placeholder="Enter staff ID"
-                    value={formData.id}
-                    onChange={(e) => handleInputChange('id', e.target.value)}
-                    className={errors.id ? 'border-red-500' : ''}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAutoGenerateId}
-                    className="whitespace-nowrap"
-                  >
-                    Generate
-                  </Button>
-                </div>
-                {errors.id && <p className="text-sm text-red-500">{errors.id}</p>}
+                <label className="text-sm font-medium text-gray-700">Staff ID</label>
+                <Input
+                  value={formData.id}
+                  disabled
+                  className="bg-gray-100"
+                />
               </div>
 
               <div className="space-y-2">
@@ -206,7 +196,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
               Cancel
             </Button>
             <Button onClick={handleSubmit} disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Add Staff Member'}
+              {isLoading ? 'Updating...' : 'Update Staff Member'}
             </Button>
           </div>
         </div>
@@ -215,4 +205,4 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
   );
 };
 
-export default AddStaffModal;
+export default EditStaffModal;

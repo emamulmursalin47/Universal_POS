@@ -1,22 +1,32 @@
 // components/StaffTable.tsx
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, Edit, UserX } from 'lucide-react';
-import { StaffTableProps } from '@/types/staff';
-import { formatRoleName } from '@/utils/StaffValidation';
+import { Users, Edit, UserX, UserCheck, Trash2 } from 'lucide-react';
+import { Staff } from '@/types/staff';
+import { formatRoleName } from '@/utils/staffUtiils';
 
 
-const StaffTable: React.FC<StaffTableProps> = ({ staff, onEdit, onDeactivate }) => {
-  const getStatusBadge = (status: string = 'active') => {
-    const statusStyles = {
-      active: 'bg-green-100 text-green-800',
-      inactive: 'bg-gray-100 text-gray-800',
-      suspended: 'bg-red-100 text-red-800'
-    };
+interface StaffTableProps {
+  staff: Staff[];
+  onEdit: (staff: Staff) => void;
+  onToggleStatus: (staffId: string) => void;
+  onDelete: (staffId: string) => void;
+}
 
-    return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusStyles[status as keyof typeof statusStyles] || statusStyles.active}`}>
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+const StaffTable: React.FC<StaffTableProps> = ({
+  staff,
+  onEdit,
+  onToggleStatus,
+  onDelete
+}) => {
+  const getStatusBadge = (status: string) => {
+    return status === 'active' ? (
+      <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        Active
+      </span>
+    ) : (
+      <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+        Inactive
       </span>
     );
   };
@@ -50,17 +60,9 @@ const StaffTable: React.FC<StaffTableProps> = ({ staff, onEdit, onDeactivate }) 
               <tr key={staffMember.id} className="border-b hover:bg-gray-50 transition-colors">
                 <td className="p-4">
                   <div className="flex items-center">
-                    {staffMember.avatar ? (
-                      <img
-                        src={staffMember.avatar}
-                        alt={staffMember.name}
-                        className="h-8 w-8 rounded-full object-cover mr-3"
-                      />
-                    ) : (
-                      <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                        <Users className="h-4 w-4 text-blue-600" />
-                      </div>
-                    )}
+                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                      <Users className="h-4 w-4 text-blue-600" />
+                    </div>
                     <div>
                       <span className="font-medium text-gray-900">{staffMember.name}</span>
                       <div className="text-xs text-gray-500">ID: {staffMember.id}</div>
@@ -82,9 +84,8 @@ const StaffTable: React.FC<StaffTableProps> = ({ staff, onEdit, onDeactivate }) 
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => onEdit(staffMember.id)}
+                      onClick={() => onEdit(staffMember)}
                       className="hover:bg-blue-50 hover:border-blue-300"
-                      title="Edit staff member"
                     >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
@@ -92,12 +93,32 @@ const StaffTable: React.FC<StaffTableProps> = ({ staff, onEdit, onDeactivate }) 
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => onDeactivate(staffMember.id)}
-                      className="text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
-                      title="Deactivate staff member"
+                      onClick={() => onToggleStatus(staffMember.id)}
+                      className={`${staffMember.status === 'active' 
+                        ? 'text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300' 
+                        : 'text-green-500 hover:text-green-600 hover:bg-green-50 hover:border-green-300'
+                      }`}
                     >
-                      <UserX className="h-3 w-3 mr-1" />
-                      Deactivate
+                      {staffMember.status === 'active' ? (
+                        <>
+                          <UserX className="h-3 w-3 mr-1" />
+                          Deactivate
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="h-3 w-3 mr-1" />
+                          Activate
+                        </>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onDelete(staffMember.id)}
+                      className="text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
+                    >
+                      <Trash2 className="h-3 w-3 mr-1" />
+                      Delete
                     </Button>
                   </div>
                 </td>
