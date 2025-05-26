@@ -321,7 +321,7 @@ export const AddShopModal: React.FC<AddShopModalProps> = ({
           <Button 
             type="submit"
             disabled={isSubmitting}
-            className="order-1 sm:order-2 h-11 px-6 bg-blue-600 hover:bg-blue-700"
+            className="order-1 sm:order-2 h-11 px-6"
           >
             {isSubmitting ? (
               <>

@@ -317,7 +317,7 @@ export const EditShopModal: React.FC<EditShopModalProps> = ({
             <Button 
               type="submit"
               disabled={isSubmitting}
-              className="h-11 px-6 bg-blue-600 hover:bg-blue-700"
+              className="h-11 px-6"
             >
               {isSubmitting ? (
                 <>

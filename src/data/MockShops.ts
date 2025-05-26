@@ -1,3 +1,6 @@
+// data/MockShops.ts
+import { Shop } from '@/types/shop';
+
 export const MOCK_SHOPS: Shop[] = [
   {
     id: 1,
@@ -142,143 +145,33 @@ export const MOCK_SHOPS: Shop[] = [
     createdAt: "2024-07-09T07:30:00.000Z",
     deadline: "2025-07-09T23:59:59.000Z",
     lastUpdated: "2024-12-10T11:45:00.000Z"
-  }
-]; "// data/MockShops.ts
-import { Shop } from '@/types/shop';
-
-export const MOCK_SHOPS: Shop[] = [
+  },
   {
-    id: 1,
-    name: "Tech Plaza Electronics",
-    email: "info@techplaza.com",
-    contact: "+880-1712-345678",
-    ownerName: "Ahmed Hassan",
-    ownerEmail: "ahmed.hassan@gmail.com",
+    id: 11,
+    name: "Smart Mobile Zone",
+    email: "info@smartmobilezone.com",
+    contact: "+880-1634-567812",
+    address: "Shop 23, Mobile Market, Gulistan, Dhaka-1000",
+    ownerName: "Rafiq Ahmed",
+    ownerPhone: "+880-1634-222333",
     subscriptionPlan: "premium",
     subscriptionStatus: "active",
     isActive: true,
-    createdAt: "2024-01-15T08:30:00.000Z",
-    deadline: "2025-01-15T23:59:59.000Z",
-    lastUpdated: "2024-12-20T14:22:00.000Z"
+    createdAt: "2024-08-20T09:30:00.000Z",
+    deadline: "2025-08-20T23:59:59.000Z"
   },
   {
-    id: 2,
-    name: "Fashion Corner Boutique",
-    email: "contact@fashioncorner.bd",
-    contact: "+880-1856-789012",
-    ownerName: "Fatima Rahman",
-    ownerEmail: "fatima.rahman@outlook.com",
-    subscriptionPlan: "standard",
-    subscriptionStatus: "active",
-    isActive: true,
-    createdAt: "2024-02-08T10:15:00.000Z",
-    deadline: "2025-02-08T23:59:59.000Z"
-  },
-  {
-    id: 3,
-    name: "Green Garden Nursery",
-    email: "hello@greengarden.com",
-    contact: "+880-1923-456789",
-    ownerName: "Mohammad Ali",
-    ownerEmail: "mohammad.ali@yahoo.com",
+    id: 12,
+    name: "Mama's Kitchen",
+    email: "orders@mamaskitchen.bd",
+    contact: "+880-1945-678123",
+    address: "House 67, Block C, Bashundhara R/A, Dhaka-1229",
+    ownerName: "Ruma Khatun",
+    ownerPhone: "+880-1945-444555",
     subscriptionPlan: "basic",
-    subscriptionStatus: "expired",
-    isActive: false,
-    createdAt: "2023-11-22T09:45:00.000Z",
-    deadline: "2024-11-22T23:59:59.000Z",
-    lastUpdated: "2024-11-25T16:30:00.000Z"
-  },
-  {
-    id: 4,
-    name: "Spice World Market",
-    email: "orders@spiceworld.bd",
-    contact: "+880-1734-567890",
-    ownerName: "Rashida Begum",
-    ownerEmail: "rashida.begum@gmail.com",
-    subscriptionPlan: "premium",
     subscriptionStatus: "trial",
     isActive: true,
-    createdAt: "2024-03-12T11:20:00.000Z",
-    deadline: "2025-06-12T23:59:59.000Z"
-  },
-  {
-    id: 5,
-    name: "Digital Print Pro",
-    email: "service@digitalprintpro.com",
-    contact: "+880-1645-678901",
-    ownerName: "Karim Uddin",
-    ownerEmail: "karim.uddin@hotmail.com",
-    subscriptionPlan: "standard",
-    subscriptionStatus: "active",
-    isActive: true,
-    createdAt: "2024-01-28T13:10:00.000Z",
-    deadline: "2025-01-28T23:59:59.000Z"
-  },
-  {
-    id: 6,
-    name: "Homemade Delights",
-    email: "info@homemadedelights.bd",
-    contact: "+880-1789-012345",
-    ownerName: "Salma Khatun",
-    ownerEmail: "salma.khatun@gmail.com",
-    subscriptionPlan: "basic",
-    subscriptionStatus: "expired",
-    isActive: false,
-    createdAt: "2023-10-05T15:30:00.000Z",
-    deadline: "2024-10-05T23:59:59.000Z"
-  },
-  {
-    id: 7,
-    name: "Auto Parts Central",
-    email: "sales@autopartscentral.com",
-    contact: "+880-1590-123456",
-    ownerName: "Habibur Rahman",
-    ownerEmail: "habib.rahman@gmail.com",
-    subscriptionPlan: "premium",
-    subscriptionStatus: "active",
-    isActive: true,
-    createdAt: "2024-04-18T12:45:00.000Z",
-    deadline: "2025-04-18T23:59:59.000Z",
-    lastUpdated: "2024-12-15T09:15:00.000Z"
-  },
-  {
-    id: 8,
-    name: "Beauty & Wellness Spa",
-    email: "booking@beautywellness.bd",
-    contact: "+880-1456-789012",
-    ownerName: "Nasreen Akter",
-    ownerEmail: "nasreen.akter@outlook.com",
-    subscriptionPlan: "standard",
-    subscriptionStatus: "trial",
-    isActive: true,
-    createdAt: "2024-05-02T14:25:00.000Z",
-    deadline: "2025-08-02T23:59:59.000Z"
-  },
-  {
-    id: 9,
-    name: "Book Haven Library",
-    email: "contact@bookhaven.com",
-    contact: "+880-1367-890123",
-    ownerName: "Dr. Abdul Karim",
-    ownerEmail: "dr.karim@academicmail.edu",
-    subscriptionPlan: "basic",
-    subscriptionStatus: "active",
-    isActive: true,
-    createdAt: "2024-06-14T16:00:00.000Z",
-    deadline: "2025-06-14T23:59:59.000Z"
-  },
-  {
-    id: 10,
-    name: "Fresh Fish Market",
-    email: "orders@freshfish.bd",
-    contact: "+880-1278-901234",
-    ownerName: "Mizanur Rahman",
-    ownerEmail: "mizan.rahman@fishmarket.com",
-    subscriptionPlan: "standard",
-    subscriptionStatus: "active",
-    isActive: false,
-    createdAt: "2024-07-09T07:30:00.000Z",
-    deadline: "2025-07-09T23:59:59.000Z",
-    lastUpdated: "2024-12-10T11:45:00.000Z"
+    createdAt: "2024-09-15T11:45:00.000Z",
+    deadline: "2025-12-15T23:59:59.000Z"
   }
 ];
