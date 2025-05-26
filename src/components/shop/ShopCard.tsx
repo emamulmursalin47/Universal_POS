@@ -1,6 +1,6 @@
-// components/shop/ShopCard.tsx (Responsive)
+// components/shop/ShopCard.tsx
 import React, { memo } from 'react';
-import { Building2, Mail, Phone, Calendar } from 'lucide-react';
+import { Building2, Mail, Phone, Calendar, User, MapPin } from 'lucide-react';
 import { ShopCardProps } from '@/types/shop';
 import { ShopActionMenu } from './ShopActionMenu';
 import { 
@@ -23,46 +23,45 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
   const deadlineInfo = getDeadlineStatus(shop.deadline);
 
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 ${
-      !shop.isActive ? 'opacity-60' : ''
+    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden ${
+      !shop.isActive ? 'opacity-70' : ''
     }`}>
-      {/* Mobile and Tablet Layout */}
-      <div className="p-3 sm:p-4 lg:p-5">
-        {/* Header Section */}
-        <div className="flex items-start justify-between mb-3 sm:mb-4">
+      {/* Header Section */}
+      <div className="p-4 sm:p-5 lg:p-6">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex items-center flex-1 min-w-0">
             {/* Shop Icon */}
-            <div className={`h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0 ${
+            <div className={`h-12 w-12 sm:h-14 sm:w-14 lg:h-16 lg:w-16 rounded-full flex items-center justify-center mr-3 sm:mr-4 flex-shrink-0 ${
               shop.isActive ? 'bg-blue-100' : 'bg-gray-100'
             }`}>
-              <Building2 className={`h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 ${shop.isActive ? 'text-blue-600' : 'text-gray-400'}`} />
+              <Building2 className={`h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 ${shop.isActive ? 'text-blue-600' : 'text-gray-400'}`} />
             </div>
             
             {/* Shop Info */}
             <div className="min-w-0 flex-1">
               <h3 
-                className="font-semibold text-base sm:text-lg lg:text-xl text-gray-900 truncate" 
+                className="font-bold text-lg sm:text-xl lg:text-2xl text-gray-900 truncate mb-2" 
                 title={shop.name}
               >
                 {shop.name}
               </h3>
               
-              {/* Status Badges - Responsive Layout */}
-              <div className="flex flex-wrap gap-1 sm:gap-2 mt-1 sm:mt-2">
+              {/* Status Badges */}
+              <div className="flex flex-wrap gap-2 mb-2">
                 <span 
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getActiveStatusColor(shop.isActive)}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getActiveStatusColor(shop.isActive)}`}
                   title={`Shop Status: ${shop.isActive ? 'Active' : 'Inactive'}`}
                 >
                   {shop.isActive ? 'Active' : 'Inactive'}
                 </span>
                 <span 
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(shop.subscriptionStatus)}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(shop.subscriptionStatus)}`}
                   title={`Subscription: ${formatStatusName(shop.subscriptionStatus)}`}
                 >
                   {formatStatusName(shop.subscriptionStatus)}
                 </span>
                 <span 
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${getPlanBadgeColor(shop.subscriptionPlan)}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getPlanBadgeColor(shop.subscriptionPlan)}`}
                   title={`Plan: ${formatPlanName(shop.subscriptionPlan)}`}
                 >
                   {formatPlanName(shop.subscriptionPlan)}
@@ -83,57 +82,135 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
           </div>
         </div>
         
-        {/* Contact Information - Responsive Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600">
-          {/* Email */}
-          <div className="flex items-center min-w-0">
-            <Mail className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
-            <span className="truncate" title={shop.email}>
-              {shop.email}
-            </span>
-          </div>
-          
-          {/* Phone */}
-          <div className="flex items-center min-w-0">
-            <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
-            <span className="truncate" title={shop.contact}>
-              {shop.contact}
-            </span>
-          </div>
-          
-          {/* Created Date */}
-          <div className="flex items-center">
-            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
-            <span className="text-xs sm:text-sm">Created: {formatDate(shop.createdAt)}</span>
-          </div>
-          
-          {/* Deadline */}
-          <div className="flex items-center">
-            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
-            <span className={`text-xs sm:text-sm ${deadlineInfo.color}`}>
-              Deadline: {formatDate(shop.deadline)}
-            </span>
-          </div>
-          
-          {/* Last Updated - Full Width on Mobile */}
-          {shop.lastUpdated && (
-            <div className="flex items-center sm:col-span-2">
-              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-2 flex-shrink-0" />
-              <span className="text-xs sm:text-sm">Updated: {formatDate(shop.lastUpdated)}</span>
+        {/* Contact Information Grid */}
+        <div className="space-y-3">
+          {/* Shop Contact Details */}
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Shop Details
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              {/* Shop Email */}
+              <div className="flex items-center min-w-0">
+                <Mail className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500 mb-1">Email</p>
+                  <p className="text-sm font-medium text-gray-900 truncate" title={shop.email}>
+                    {shop.email}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Shop Phone */}
+              <div className="flex items-center min-w-0">
+                <Phone className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500 mb-1">Phone</p>
+                  <p className="text-sm font-medium text-gray-900 truncate" title={shop.contact}>
+                    {shop.contact}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Shop Address */}
+              <div className="flex items-start min-w-0">
+                <MapPin className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500 mb-1">Address</p>
+                  <p className="text-sm font-medium text-gray-900 line-clamp-2" title={shop.address}>
+                    {shop.address}
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
+          
+          {/* Owner Contact Details */}
+          <div className="bg-green-50 rounded-lg p-3 sm:p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <User className="h-4 w-4" />
+              Owner Details
+            </h4>
+            <div className="grid grid-cols-1 gap-3">
+              {/* Owner Name */}
+              <div className="flex items-center min-w-0">
+                <User className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500 mb-1">Name</p>
+                  <p className="text-sm font-medium text-gray-900 truncate" title={shop.ownerName}>
+                    {shop.ownerName}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Owner Phone */}
+              <div className="flex items-center min-w-0">
+                <Phone className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs text-gray-500 mb-1">Phone</p>
+                  <p className="text-sm font-medium text-gray-900 truncate" title={shop.ownerPhone}>
+                    {shop.ownerPhone}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Dates Information */}
+          <div className="bg-purple-50 rounded-lg p-3 sm:p-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Important Dates
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Created Date */}
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Created</p>
+                  <p className="text-sm font-medium text-gray-900">{formatDate(shop.createdAt)}</p>
+                </div>
+              </div>
+              
+              {/* Deadline */}
+              <div className="flex items-center">
+                <Calendar className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                <div>
+                  <p className="text-xs text-gray-500">Deadline</p>
+                  <p className={`text-sm font-medium ${deadlineInfo.color}`}>
+                    {formatDate(shop.deadline)}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Last Updated */}
+              {shop.lastUpdated && (
+                <div className="flex items-center sm:col-span-2">
+                  <Calendar className="h-4 w-4 mr-3 flex-shrink-0 text-gray-500" />
+                  <div>
+                    <p className="text-xs text-gray-500">Last Updated</p>
+                    <p className="text-sm font-medium text-gray-900">{formatDate(shop.lastUpdated)}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
         
-        {/* Deadline Status - Mobile Only */}
-        <div className="mt-3 sm:hidden">
-          <div className={`text-xs px-2 py-1 rounded ${
-            deadlineInfo.status === 'expired' ? 'bg-red-50 text-red-700' :
-            deadlineInfo.status === 'warning' ? 'bg-yellow-50 text-yellow-700' :
-            'bg-green-50 text-green-700'
+        {/* Deadline Status Alert */}
+        {deadlineInfo.status !== 'safe' && (
+          <div className={`mt-4 text-sm px-4 py-3 rounded-lg font-medium ${
+            deadlineInfo.status === 'expired' 
+              ? 'bg-red-100 text-red-800 border border-red-200' 
+              : 'bg-yellow-100 text-yellow-800 border border-yellow-200'
           }`}>
-            {deadlineInfo.text}
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>{deadlineInfo.text}</span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

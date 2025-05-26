@@ -7,6 +7,9 @@ export interface Shop {
   name: string;
   email: string;
   contact: string;
+  address: string;
+  ownerName: string;
+  ownerPhone: string;
   subscriptionPlan: SubscriptionPlan;
   subscriptionStatus: SubscriptionStatus;
   isActive: boolean;
@@ -19,6 +22,9 @@ export interface ShopFormData {
   name: string;
   email: string;
   contact: string;
+  address: string;
+  ownerName: string;
+  ownerPhone: string;
   subscriptionPlan: string;
   deadline: string;
 }

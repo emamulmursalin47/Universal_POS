@@ -1,7 +1,7 @@
 // components/shop/ShopTable.tsx (Responsive)
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Building2 } from 'lucide-react';
+import { Building2, User } from 'lucide-react';
 import { Shop } from '@/types/shop';
 
 import { getDeadlineStatus } from '@/utils/shopUtils';
@@ -30,7 +30,9 @@ export const ShopTable: React.FC<ShopTableProps> = ({
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="font-semibold">Shop Name</TableHead>
-              <TableHead className="font-semibold">Contact</TableHead>
+              <TableHead className="font-semibold">Shop Contact</TableHead>
+              <TableHead className="font-semibold">Address</TableHead>
+              <TableHead className="font-semibold">Owner Info</TableHead>
               <TableHead className="font-semibold">Subscription</TableHead>
               <TableHead className="font-semibold">Status</TableHead>
               <TableHead className="font-semibold">Active</TableHead>
@@ -62,6 +64,20 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{shop.contact}</TableCell>
+                  <TableCell className="text-sm max-w-[150px]">
+                    <div className="truncate" title={shop.address}>{shop.address}</div>
+                  </TableCell>
+                  <TableCell className="py-4">
+                    <div className="flex items-center">
+                      <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                        <User className="h-3 w-3 text-gray-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-sm">{shop.ownerName}</div>
+                        <div className="text-xs text-muted-foreground">{shop.ownerPhone}</div>
+                      </div>
+                    </div>
+                  </TableCell>
                   <TableCell className="capitalize text-sm">{shop.subscriptionPlan}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -112,8 +128,8 @@ export const ShopTable: React.FC<ShopTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="font-semibold">Shop</TableHead>
-              <TableHead className="font-semibold">Plan & Status</TableHead>
+              <TableHead className="font-semibold">Shop & Address</TableHead>
+              <TableHead className="font-semibold">Owner & Plan</TableHead>
               <TableHead className="font-semibold">Deadline</TableHead>
               <TableHead className="font-semibold text-center">Actions</TableHead>
             </TableRow>
@@ -127,21 +143,41 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                   className={`hover:bg-gray-50 transition-colors ${!shop.isActive ? 'opacity-60' : ''}`}
                 >
                   <TableCell className="py-4">
-                    <div className="flex items-center">
-                      <div className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
-                        shop.isActive ? 'bg-primary/10' : 'bg-gray-100'
-                      }`}>
-                        <Building2 className={`h-4 w-4 ${shop.isActive ? 'text-primary' : 'text-gray-400'}`} />
+                    <div className="space-y-3">
+                      {/* Shop Info */}
+                      <div className="flex items-center">
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
+                          shop.isActive ? 'bg-primary/10' : 'bg-gray-100'
+                        }`}>
+                          <Building2 className={`h-4 w-4 ${shop.isActive ? 'text-primary' : 'text-gray-400'}`} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-sm truncate">{shop.name}</div>
+                          <div className="text-xs text-muted-foreground truncate">{shop.email}</div>
+                          <div className="text-xs text-muted-foreground">{shop.contact}</div>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-medium text-sm truncate">{shop.name}</div>
-                        <div className="text-xs text-muted-foreground truncate">{shop.email}</div>
-                        <div className="text-xs text-muted-foreground">{shop.contact}</div>
+                      
+                      {/* Address */}
+                      <div className="text-xs text-muted-foreground ml-11 truncate" title={shop.address}>
+                        📍 {shop.address}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
+                      {/* Owner Info */}
+                      <div className="flex items-center">
+                        <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                          <User className="h-3 w-3 text-gray-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium text-gray-700">{shop.ownerName}</div>
+                          <div className="text-xs text-muted-foreground truncate">{shop.ownerPhone}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Status Badges */}
                       <div className="flex flex-wrap gap-1">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           shop.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
@@ -190,7 +226,7 @@ export const ShopTable: React.FC<ShopTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow className="bg-gray-50">
-              <TableHead className="font-semibold">Shop Details</TableHead>
+              <TableHead className="font-semibold">Complete Shop Details</TableHead>
               <TableHead className="font-semibold text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -203,7 +239,8 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                   className={`hover:bg-gray-50 transition-colors ${!shop.isActive ? 'opacity-60' : ''}`}
                 >
                   <TableCell className="py-4">
-                    <div className="space-y-2">
+                    <div className="space-y-3">
+                      {/* Shop Info */}
                       <div className="flex items-center">
                         <div className={`h-8 w-8 rounded-full flex items-center justify-center mr-3 ${
                           shop.isActive ? 'bg-primary/10' : 'bg-gray-100'
@@ -216,6 +253,23 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                         </div>
                       </div>
                       
+                      {/* Address */}
+                      <div className="text-xs text-muted-foreground ml-11 truncate" title={shop.address}>
+                        📍 {shop.address}
+                      </div>
+                      
+                      {/* Owner Info */}
+                      <div className="flex items-center ml-11">
+                        <div className="h-6 w-6 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                          <User className="h-3 w-3 text-gray-600" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-medium text-gray-700">Owner: {shop.ownerName}</div>
+                          <div className="text-xs text-muted-foreground">{shop.ownerPhone}</div>
+                        </div>
+                      </div>
+                      
+                      {/* Status Badges */}
                       <div className="flex flex-wrap gap-1 ml-11">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           shop.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
