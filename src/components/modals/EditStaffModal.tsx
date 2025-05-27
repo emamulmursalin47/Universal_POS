@@ -104,29 +104,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Edit Staff Member</h2>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Staff ID</label>
-                <Input
-                  value={formData.id}
-                  disabled
-                  className="bg-gray-100"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Login ID <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  placeholder="Enter login ID"
-                  value={formData.loginId}
-                  onChange={(e) => handleInputChange('loginId', e.target.value)}
-                  className={errors.loginId ? 'border-red-500' : ''}
-                />
-                {errors.loginId && <p className="text-sm text-red-500">{errors.loginId}</p>}
-              </div>
-            </div>
+           
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
