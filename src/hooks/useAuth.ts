@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '@/redux';
@@ -12,9 +11,9 @@ export const useAuth = () => {
   const { user, isAuthenticated, isLoading, error } = useSelector((state: RootState) => state.auth);
 
   const login = async (email: string, password: string) => {
-    const success = await dispatch(loginUser(email, password) as any);
+    const { success, role } = await dispatch(loginUser(email, password) as any);
     if (success) {
-      redirectBasedOnRole();
+      redirectBasedOnRole(role);
     }
     return success;
   };
@@ -24,10 +23,11 @@ export const useAuth = () => {
     navigate(ROUTES.LOGIN);
   };
 
-  const redirectBasedOnRole = () => {
+  const redirectBasedOnRole = (role: UserRole) => {
     if (!user) return;
+    if (!role) return;
     
-    switch (user.role) {
+    switch (role) {
       case 'super_admin':
         navigate(ROUTES.SUPER_ADMIN.DASHBOARD);
         break;
