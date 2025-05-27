@@ -3,8 +3,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import { Staff, StaffFormData } from '@/types/staff';
 import { MOCK_STAFF_DATA } from '@/constants/staff';
+import { Staff, StaffFormData } from '@/types/staff';
 import StaffSearch from '@/components/staff/StaffSearch';
 import StaffTable from '@/components/tables/StaffTable';
 import AddStaffModal from '@/components/modals/AddStaffModal';
@@ -42,6 +42,9 @@ const StaffPage: React.FC = () => {
       return matchesSearch && matchesStatus;
     });
   }, [staffList, searchTerm, statusFilter]);
+
+  // Check if filters are applied
+  const hasFilters = searchTerm.trim() !== '' || statusFilter !== 'all';
 
   const handleAddStaff = useCallback((newStaffData: StaffFormData) => {
     // Check for existing data
@@ -134,6 +137,10 @@ const StaffPage: React.FC = () => {
     setStatusFilter('all');
   };
 
+  const openAddModal = () => {
+    setIsAddModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
@@ -150,7 +157,7 @@ const StaffPage: React.FC = () => {
           </div>
           
           <Button 
-            onClick={() => setIsAddModalOpen(true)} 
+            onClick={openAddModal} 
             size="lg"
             className="w-full sm:w-auto"
           >
@@ -167,25 +174,45 @@ const StaffPage: React.FC = () => {
               <CardTitle className="text-lg sm:text-xl lg:text-2xl">
                 All Staff Members ({filteredStaff.length})
               </CardTitle>
+              
+              {/* Quick Stats Pills */}
+              {staffList.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                    {staffList.filter(s => s.status === 'active').length} Active
+                  </div>
+                  <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                    {staffList.filter(s => s.status === 'inactive').length} Inactive
+                  </div>
+                  <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                    {staffList.length} Total
+                  </div>
+                </div>
+              )}
             </div>
           </CardHeader>
           
           <CardContent className="space-y-6">
-            {/* Search and Filter Section */}
-            <StaffSearch
-              searchTerm={searchTerm}
-              statusFilter={statusFilter}
-              onSearchChange={setSearchTerm}
-              onStatusFilterChange={setStatusFilter}
-              onClearFilters={clearFilters}
-            />
+            {/* Search and Filter Section - Only show if there are staff members */}
+            {staffList.length > 0 && (
+              <StaffSearch
+                searchTerm={searchTerm}
+                statusFilter={statusFilter}
+                onSearchChange={setSearchTerm}
+                onStatusFilterChange={setStatusFilter}
+                onClearFilters={clearFilters}
+              />
+            )}
 
-            {/* Staff Table */}
+            {/* Responsive Staff Table/Cards */}
             <StaffTable
               staff={filteredStaff}
               onEdit={handleEditStaff}
               onToggleStatus={handleToggleStatus}
               onDelete={handleDeleteStaff}
+              onAddNew={openAddModal}
+              onClearFilters={clearFilters}
+              hasFilters={hasFilters}
             />
           </CardContent>
         </Card>

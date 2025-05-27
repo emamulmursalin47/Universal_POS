@@ -3,7 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StaffFormData, StaffFormErrors } from '@/types/staff';
-import { generateStaffId, validateStaffForm } from '@/utils/staffUtiils';
+import { validateStaffForm } from '@/utils/staffUtiils';
 import { STAFF_ROLES } from '@/constants/staff';
 
 
@@ -40,11 +40,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
     }
   }, [errors]);
 
-  const handleAutoGenerateId = useCallback(() => {
-    const newId = generateStaffId();
-    handleInputChange('id', newId);
-  }, [handleInputChange]);
-
+ 
   const handleSubmit = useCallback(async () => {
     const validationErrors = validateStaffForm(formData);
     
@@ -99,44 +95,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Add New Staff Member</h2>
 
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Staff ID <span className="text-red-500">*</span>
-                </label>
-                <div className="flex space-x-2">
-                  <Input
-                    placeholder="Enter staff ID"
-                    value={formData.id}
-                    onChange={(e) => handleInputChange('id', e.target.value)}
-                    className={errors.id ? 'border-red-500' : ''}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleAutoGenerateId}
-                    className="whitespace-nowrap"
-                  >
-                    Generate
-                  </Button>
-                </div>
-                {errors.id && <p className="text-sm text-red-500">{errors.id}</p>}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
-                  Login ID <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  placeholder="Enter login ID"
-                  value={formData.loginId}
-                  onChange={(e) => handleInputChange('loginId', e.target.value)}
-                  className={errors.loginId ? 'border-red-500' : ''}
-                />
-                {errors.loginId && <p className="text-sm text-red-500">{errors.loginId}</p>}
-              </div>
-            </div>
+           
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
