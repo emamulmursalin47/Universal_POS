@@ -6,6 +6,7 @@ import SalesHistoryPage from '@/pages/cashier/SalesHistoryPage';
 import ReportsPage from '@/pages/cashier/ReportsPage';
 import ProfilePage from '@/pages/cashier/ProfilePage';
 
+
 export const cashierRoutes = [
   {
     path: "/cashier",
@@ -26,7 +27,8 @@ export const cashierRoutes = [
       {
         path: "profile",
         element: <ProfilePage />
-      }
+      },
+       
     ]
   }
 ];
