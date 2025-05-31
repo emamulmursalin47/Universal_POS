@@ -12,7 +12,7 @@ import { ShopSearch } from '@/components/shop/ShopSearch';
 // Hooks and Data
 import { useShopActions } from '@/hooks/useShopActions';
 import { Shop } from '@/types/shop';
-import { MOCK_SHOPS } from '@/data/MockShops';
+// import { MOCK_SHOPS } from '@/data/MockShops';
 import { AddShopModal } from '@/components/modals/AddShopModal';
 import { EditShopModal } from '@/components/modals/EditShopModal';
 import { UpdateSubscriptionModal } from '@/components/modals/UpdateSubscriptionModal';

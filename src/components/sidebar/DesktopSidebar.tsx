@@ -19,7 +19,7 @@ interface DesktopSidebarProps extends SidebarProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
   isActiveRoute: (path: string) => boolean;
-  user: any;
+  user?: any;
   userMenuOpen: boolean;
   setUserMenuOpen: (open: boolean) => void;
   signOut: () => void;
@@ -42,6 +42,7 @@ export function DesktopSidebar({
     setUserMenuOpen(false);
   };
 
+  
   return (
     <div
       className={cn(
@@ -73,7 +74,7 @@ export function DesktopSidebar({
         
         {/* Toggle Button */}
         <Button
-          variant="ghost"
+          variant="default"
           size="sm"
           onClick={handleToggleCollapse}
           className="h-8 w-8 p-0 hover:bg-accent rounded-md transition-all duration-200 flex-shrink-0"

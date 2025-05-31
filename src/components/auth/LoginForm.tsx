@@ -2,23 +2,38 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useAuth } from '@/hooks/useAuth';
+// import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { AtSign, Lock, ShoppingBag } from 'lucide-react';
+import type { UserRole } from '@/lib/types';
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/lib/constants';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
+import { DecodedToken } from '@/lib/types';
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address' }),
+  email: z.union([
+    z.string().email({ message: 'Please enter a valid email address' }),
+    z.string().min(3, { message: 'Username must be at least 3 characters' })
+  ]),
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+
+
 export function LoginForm() {
-  const { login, error, isLoading } = useAuth();
+  // const { login, error, isLoading } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -27,6 +42,93 @@ export function LoginForm() {
       password: '',
     },
   });
+
+  const redirectBasedOnRole = (role: UserRole) => {
+    console.log(role);
+    // console.log(user);
+    // if (!user) return;
+
+    switch (role) {
+      case 'superAdmin':
+        console.log('redirecting to super admin dashboard');
+        navigate(ROUTES.SUPER_ADMIN.DASHBOARD);
+        break;
+      case 'vendor':
+        navigate(ROUTES.VENDOR_ADMIN.DASHBOARD);
+        break;
+      case 'manager':
+        navigate(ROUTES.CASHIER.POS);
+        break;
+      default:
+        navigate(ROUTES.LOGIN);
+    }
+  };
+
+  const login = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+    setServerError(null);
+
+    try {
+      const response = await axios.post('/api/v1/auth/login', { userId:email, password });
+      const { accessToken } = response.data.data;
+
+      if (!accessToken) {
+        setServerError('No access token received from server');
+        setIsLoading(false);
+        return false;
+      }
+
+      localStorage.setItem('accessToken', accessToken);
+      const decoded: DecodedToken = jwtDecode(accessToken);
+      console.log(decoded.role);
+      redirectBasedOnRole(decoded.role);
+
+      setIsLoading(false);
+      return true;
+    } catch (error) {
+      setIsLoading(false);
+
+      if (axios.isAxiosError(error)) {
+        // Handle different HTTP status codes
+        if (error.response) {
+          const status = error.response.status;
+          const message = error.response.data?.message || error.response.data?.error;
+
+          switch (status) {
+            case 400:
+              setServerError(message || 'Invalid request. Please check your input.');
+              break;
+            case 401:
+              setServerError(message || 'Invalid email or password.');
+              break;
+            case 403:
+              setServerError(message || 'Access forbidden.');
+              break;
+            case 404:
+              setServerError('Login service not found.');
+              break;
+            case 500:
+              setServerError('Server error. Please try again later.');
+              break;
+            default:
+              setServerError(message || `Server error (${status}). Please try again.`);
+          }
+        } else if (error.request) {
+          // Network error - no response received
+          setServerError('Network error. Please check your connection and try again.');
+        } else {
+          // Request setup error
+          setServerError('Request failed. Please try again.');
+        }
+      } else {
+        // Non-Axios error (e.g., JWT decode error)
+        setError('An unexpected error occurred. Please try again.');
+      }
+
+      return false;
+    }
+  };
 
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
@@ -57,7 +159,7 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Username</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <AtSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />

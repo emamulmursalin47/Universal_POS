@@ -1,6 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { User, UserRole } from '@/lib/types';
 import { MOCK_USERS } from '@/lib/constants';
+import { jwtDecode } from 'jwt-decode'; // Install this: npm install jwt-decode
+import axios from 'axios';
+import { decode } from 'punycode';
 
 interface AuthState {
   user: User | null;
@@ -15,6 +18,14 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
 };
+interface DecodedToken {
+  email: string;
+  role: UserRole;
+  userId: string;
+  _id: string;
+  iat: number;
+  exp: number;
+}
 
 export const authSlice = createSlice({
   name: 'auth',
@@ -48,24 +59,36 @@ export const authSlice = createSlice({
 export const loginUser = (email: string, password: string) => {
   return async (dispatch: any) => {
     dispatch(loginStart());
-    
+
     try {
+      const response = await axios.post('/api/v1/auth/login', { email, password });
+
+      if (response.data.success) {
+        const { accessToken } = response.data.data;
+
+        localStorage.setItem('accessToken', accessToken);
+
+        const decoded: DecodedToken = jwtDecode(accessToken);
+        console.log(decoded.role);
+        dispatch(loginSuccess(decoded.userId));
+        return { success: true, role: decoded.role };
+      }
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       // Find user with matching email (in a real app, this would be a server-side check)
       const foundUser = Object.values(MOCK_USERS).find(user => user.email === email);
-      
+
       if (foundUser && password === 'password') { // Simple mock password check
         dispatch(loginSuccess(foundUser));
-        return true;
+        return { success: true, role: decoded.role };
       } else {
         dispatch(loginFailure('Invalid email or password'));
-        return false;
+        return { success: false, role: null };
       }
     } catch (error) {
       dispatch(loginFailure('An error occurred during login'));
-      return false;
+      return { success: false, role: null };
     }
   };
 };
