@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/statistics/StatsCard';
 import { Building2, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { MOCK_SHOPS } from '@/lib/constants';
+// import { MOCK_SHOPS } from '@/lib/constants';
 import axios from 'axios';
 
 import type { Shop } from '@/lib/types';
@@ -110,7 +110,7 @@ export default function SuperAdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Subscription Distribution</CardTitle>
             <CardDescription>Breakdown of subscription plans</CardDescription>
@@ -141,7 +141,7 @@ export default function SuperAdminDashboard() {
               })}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

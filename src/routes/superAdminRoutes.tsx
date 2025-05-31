@@ -23,10 +23,10 @@ export const superAdminRoutes = [
         path: "subscriptions",
         element: <SubscriptionsPage />
       },
-      {
-        path: "settings",
-        element: <SettingsPage />
-      }
+      // {
+      //   path: "settings",
+      //   element: <SettingsPage />
+      // }
     ]
   }
 ];

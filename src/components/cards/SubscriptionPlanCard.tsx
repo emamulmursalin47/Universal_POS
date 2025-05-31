@@ -18,20 +18,20 @@ interface PlanCardProps {
 const getPlanIcon = (supportLevel: SubscriptionPlan['supportLevel']) => {
   const iconProps = {
     className: "h-5 w-5",
-    style: { 
+    style: {
       display: 'inline-block',
       verticalAlign: 'middle',
       fill: 'currentColor',
       stroke: 'currentColor'
     }
   };
-  
+
   const iconMap = {
     premium: <Headphones {...iconProps} />,
     standard: <Users {...iconProps} />,
     basic: <Package {...iconProps} />,
   };
-  return iconMap[supportLevel] || <Package {...iconProps} />;
+  return iconMap[supportLevel as keyof typeof iconMap] || <Package {...iconProps} />;
 };
 
 const getBillingCycleLabel = (cycle: SubscriptionPlan['billingCycle']) => {
@@ -43,12 +43,12 @@ const getBillingCycleLabel = (cycle: SubscriptionPlan['billingCycle']) => {
   return labelMap[cycle];
 };
 
-export const PlanCard: React.FC<PlanCardProps> = ({ 
-  plan, 
-  onEdit, 
-  onView, 
-  onToggleStatus, 
-  onDelete 
+export const PlanCard: React.FC<PlanCardProps> = ({
+  plan,
+  onEdit,
+  onView,
+  onToggleStatus,
+  onDelete
 }) => {
   const isPremium = plan.id === 'premium';
 
@@ -58,14 +58,14 @@ export const PlanCard: React.FC<PlanCardProps> = ({
         <CardTitle className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-3">
             <div className="flex-shrink-0">
-              {getPlanIcon(plan.supportLevel)}
+              {getPlanIcon("premium")}
             </div>
-            <span className="text-lg font-semibold">{plan.name}</span>
-            {!plan.isEnabled && (
+            <span className="text-lg font-semibold">{plan.planName}</span>
+            {/* {!plan.isEnabled && (
               <Badge variant="secondary" className="text-xs">
                 Disabled
               </Badge>
-            )}
+            )} */}
           </div>
           <Badge variant={isPremium ? 'default' : 'secondary'} className="shrink-0">
             ${plan.price}/{getBillingCycleLabel(plan.billingCycle)}
@@ -77,35 +77,56 @@ export const PlanCard: React.FC<PlanCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <ul className="space-y-2">
-          {plan.features.map((feature, index) => (
+          {plan?.maxProducts > 0 &&
+            <li className="flex items-center text-sm">
+              <span className="mr-3 mt-2 h-1.5 w-1.5 bg-current rounded-full shrink-0" />
+              upto {plan?.maxProducts} products
+            </li>}
+          {
+            plan?.maxUsers > 0 &&
+            <li className="flex items-center text-sm">
+              <span className="mr-3 mt-2 h-1.5 w-1.5 bg-current rounded-full shrink-0" />
+              upto {plan?.maxUsers} managers
+            </li>
+          }
+          {plan.features?.map((feature, index) => (
             <li key={index} className="flex items-start text-sm">
               <span className="mr-3 mt-2 h-1.5 w-1.5 bg-current rounded-full shrink-0" />
               <span>{feature}</span>
             </li>
           ))}
+          {
+            plan?.supportLevel &&
+            <li className="flex items-center text-sm">
+              <span className="mr-3 mt-2 h-1.5 w-1.5 bg-current rounded-full shrink-0" />
+              Priority Support
+            </li>
+          }
         </ul>
-        
+
         <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground border-t pt-3">
           <div>Products: {plan.maxProducts === -1 ? 'Unlimited' : plan.maxProducts.toLocaleString()}</div>
           <div>Users: {plan.maxUsers === -1 ? 'Unlimited' : plan.maxUsers.toLocaleString()}</div>
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            className="flex-1" 
+          <Button
+            className="flex-1"
             variant={isPremium ? 'default' : 'outline'}
             onClick={() => onEdit(plan)}
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
-          <Button variant="outline" size="icon" onClick={() => onView(plan)}>
+
+          <Button variant="outline" size="default" onClick={() => onView(plan)}>
             <Eye className="h-4 w-4" />
           </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="outline" size="default">
+                <MoreVertical className="h-4 w-4 text-black" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -114,7 +135,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
                 {plan.isEnabled ? 'Disable' : 'Enable'}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => onDelete(plan.id)}
                 className="text-destructive focus:text-destructive"
               >

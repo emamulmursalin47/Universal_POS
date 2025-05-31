@@ -24,11 +24,11 @@ const menuItems = [
     path: '/super-admin/subscriptions',
     icon: <CreditCard size={20} />,
   },
-  {
-    title: 'Settings',
-    path: '/super-admin/settings',
-    icon: <Settings size={20} />,
-  },
+  // {
+  //   title: 'Settings',
+  //   path: '/super-admin/settings',
+  //   icon: <Settings size={20} />,
+  // },
 ];
 
 export function SuperAdminLayout() {
