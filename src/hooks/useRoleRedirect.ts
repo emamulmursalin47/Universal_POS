@@ -15,10 +15,10 @@ export const useRoleRedirect = (allowedRoles: UserRole[]) => {
       } else if (user && !allowedRoles.includes(user.role)) {
         // Redirect to appropriate dashboard based on role
         switch (user.role) {
-          case 'super_admin':
+          case 'superAdmin':
             navigate(ROUTES.SUPER_ADMIN.DASHBOARD);
             break;
-          case 'vendor_admin':
+          case 'vendor':
             navigate(ROUTES.VENDOR_ADMIN.DASHBOARD);
             break;
           case 'cashier':

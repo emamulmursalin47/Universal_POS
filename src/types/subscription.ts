@@ -2,16 +2,21 @@
 export interface SubscriptionPlan {
   id: string;
   name: string;
-  price: number;
-  billingCycle: 'monthly' | 'yearly' | 'quarterly';
-  features: string[];
-  maxProducts: number; // -1 for unlimited
-  maxUsers: number; // -1 for unlimited
-  supportLevel: 'basic' | 'standard' | 'premium';
-  description?: string;
+  // supportLevel: 'basic' | 'standard' | 'premium';
   isEnabled: boolean;
-  createdAt: string;
-  updatedAt: string;
+  _id: string;
+  planName: string;
+  price: number;
+  description?: string;
+  billingCycle: 'monthly' | 'yearly'|'quarterly'; // Add more options if applicable
+  maxProducts: number;
+  maxUsers: number;
+  supportLevel: string;
+  features?: string[];
+  status: 'active' | 'inactive'; // Add more statuses if needed
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+
 }
 
 export interface ActiveSubscription {

@@ -5,17 +5,29 @@ export type SubscriptionStatus = 'active' | 'expired' | 'trial';
 export interface Shop {
   id: number;
   name: string;
-  email: string;
-  contact: string;
-  address: string;
-  ownerName: string;
-  ownerPhone: string;
-  subscriptionPlan: SubscriptionPlan;
-  subscriptionStatus: SubscriptionStatus;
-  isActive: boolean;
-  createdAt: string;
-  deadline: string;
+  contact?: string;
+  ownerName?: string;
+  ownerPhone?: string;
+  // subscriptionPlan: SubscriptionPlan;
+  // subscriptionStatus?: SubscriptionStatus;
+  isActive?: boolean;
+  deadline?: string;
   lastUpdated?: string;
+
+  _id?: string;
+  vendorId?: string;
+  user?: string; // Assuming this references a user ID (ObjectId as string)
+  shopName?: string;
+  shopOwnerName?: string;
+  email: string;
+  contactNumber: string;
+  address?: string;
+  subscriptionPlan: string; // Assuming this references a subscription plan ID
+  subscriptionDeadline: string; // ISO date string, or use Date if you parse it
+  status: 'active' | 'inactive' | 'expired' | 'trial' | 'pending'; // Add more status values as needed
+  isDeleted: boolean;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
 }
 
 export interface ShopFormData {

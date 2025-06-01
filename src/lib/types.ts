@@ -1,5 +1,5 @@
 // Common types used throughout the application
-export type UserRole = 'super_admin' | 'vendor_admin' | 'cashier';
+export type UserRole = 'superAdmin' | 'vendor' | 'manager' | 'cashier';
 
 export interface User {
   id: string;
@@ -11,16 +11,21 @@ export interface User {
 }
 
 export interface Shop {
-  id: string;
-  name: string;
-  logo?: string;
+  _id: string;
+  vendorId?: string;
+  user?: string;
+  shopName?: string;
+  shopOwnerName?: string;
+  email?: string;
+  contactNumber?: string;
   address: string;
-  contact: string;
-  email: string;
   subscriptionPlan: 'basic' | 'standard' | 'premium';
-  subscriptionStatus: 'active' | 'pending' | 'expired';
+  subscriptionStatus?: 'active' | 'pending' | 'expired';
+  subscriptionDeadline: string;
+  status: string;
+  isDeleted: false;
   createdAt: string;
-  ownerId: string;
+  updatedAt?: string;
 }
 
 export interface Product {
@@ -88,4 +93,18 @@ export interface SubscriptionPlan {
   maxProducts: number;
   maxUsers: number;
   supportLevel: 'basic' | 'standard' | 'premium';
+}
+
+export interface DecodedToken {
+  email: string;
+  role: UserRole;
+  userId: string;
+  _id: string;
+  iat: number;
+  exp: number;
+  name?: string;
+  shopId?: string;
+  avatar?: string;
+  shopName?: string;
+  shopLogo?: string;
 }

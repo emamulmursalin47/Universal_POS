@@ -13,6 +13,7 @@ export interface SidebarProps {
   menuItems: MenuItem[];
   title?: string;
   userRole?: string;
+  accessToken?: string;
 }
 
 export interface SidebarItemProps {
