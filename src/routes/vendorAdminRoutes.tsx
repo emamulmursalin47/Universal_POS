@@ -1,13 +1,14 @@
-// routes/vendorAdminRoutes.tsx
 
 import { VendorAdminLayout } from '@/components/layout/VendorAdminLayout';
 import VendorAdminDashboard from '@/pages/vendor-admin/VendorAdminDashboard';
 import ProductsPage from '@/pages/vendor-admin/ProductsPage';
 import CategoriesPage from '@/pages/vendor-admin/CategoriesPage';
-import InventoryPage from '@/pages/vendor-admin/InventoryPage';
+
 import SalesPage from '@/pages/vendor-admin/SalesPage';
 import StaffPage from '@/pages/vendor-admin/StaffPage';
 import CustomersPage from '@/pages/vendor-admin/CustomersPage';
+import SettingsPage from '@/pages/super-admin/SettingsPage';
+import InventoryPage from '@/pages/vendor-admin/InventoryPage';
 
 export const vendorAdminRoutes = [
   {
@@ -28,7 +29,7 @@ export const vendorAdminRoutes = [
       },
       {
         path: "inventory",
-        element: <InventoryPage />
+        element: <InventoryPage/>
       },
       {
         path: "sales",
@@ -41,6 +42,10 @@ export const vendorAdminRoutes = [
       {
         path: "customers",
         element: <CustomersPage />
+      },
+      {
+        path: "settings",
+        element: <SettingsPage />
       }
     ]
   }
