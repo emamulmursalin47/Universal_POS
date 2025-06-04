@@ -68,7 +68,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             )} */}
           </div>
           <Badge variant={isPremium ? 'default' : 'secondary'} className="shrink-0">
-            ${plan.price}/{getBillingCycleLabel(plan.billingCycle)}
+            ৳ {plan.price.toFixed(2)}/{getBillingCycleLabel(plan.billingCycle)}
           </Badge>
         </CardTitle>
         {plan.description && (
