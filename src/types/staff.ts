@@ -12,20 +12,37 @@ export interface Staff {
   updatedAt: Date;
 }
 
-export interface StaffFormData {
-  id: string;
-  name: string;
+export type StaffTypesNew = {
+  _id: string;
+  userId: string;
+  user: string;
   email: string;
-  role: 'cashier' | 'vendor_admin' | '';
-  loginId: string;
+  vendorId: string;
+  fullName: string;
+  contactNumber: string;
+  address: string;
+  databaseName: string;
+  role: 'admin' | 'manager' | 'staff';
+  status: 'active' | 'inactive';
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export interface StaffFormData {
+  email: string;
+  fullName: string;
+  contactNumber: string;
+  address: string;
   password: string;
+  role: string;
 }
 
 export interface StaffFormErrors {
-  id?: string;
-  name?: string;
   email?: string;
-  role?: string;
-  loginId?: string;
+  fullName?: string;
+  contactNumber?: string;
+  address?: string;
   password?: string;
+  role?: string;
 }

@@ -1,29 +1,18 @@
 // components/StaffTable.tsx
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Users, Edit, UserX, UserCheck, Trash2, Plus, Filter } from 'lucide-react';
-import { Staff } from '@/types/staff';
+import { Users, Edit, UserX, UserCheck, Trash2 } from 'lucide-react';
 import { formatRoleName } from '@/utils/staffUtiils';
-import StaffCard from '../staff/StaffCard';
+import { StaffTypesNew } from '@/types/staff';
+
 
 interface StaffTableProps {
-  staff: Staff[];
-  onEdit: (staff: Staff) => void;
-  onToggleStatus: (staffId: string) => void;
-  onDelete: (staffId: string) => void;
-  onAddNew?: () => void; // Optional for empty state
-  onClearFilters?: () => void; // Optional for empty state
-  hasFilters?: boolean; // To show appropriate empty state
+  staff: StaffTypesNew[];
+
 }
 
-const StaffTable: React.FC<StaffTableProps> = ({
+const StaffTableNew: React.FC<StaffTableProps> = ({
   staff,
-  onEdit,
-  onToggleStatus,
-  onDelete,
-  onAddNew,
-  onClearFilters,
-  hasFilters = false
 }) => {
   const getStatusBadge = (status: string) => {
     return status === 'active' ? (
@@ -47,27 +36,6 @@ const StaffTable: React.FC<StaffTableProps> = ({
         <h3 className="text-xl font-semibold text-gray-900 mb-3">
           No staff members found
         </h3>
-        <p className="text-gray-600 mb-6">
-          {hasFilters
-            ? 'Try adjusting your search terms or filters to see more results.'
-            : 'Get started by adding your first staff member to begin managing your team.'
-          }
-        </p>
-        {hasFilters ? (
-          onClearFilters && (
-            <Button onClick={onClearFilters} variant="outline">
-              <Filter className="h-4 w-4 mr-2" />
-              Clear Filters
-            </Button>
-          )
-        ) : (
-          onAddNew && (
-            <Button onClick={onAddNew}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Your First Staff Member
-            </Button>
-          )
-        )}
       </div>
     </div>
   );
@@ -86,7 +54,7 @@ const StaffTable: React.FC<StaffTableProps> = ({
               <thead>
                 <tr className="border-b bg-gray-50">
                   <th className="text-left p-4 font-medium text-gray-900">Name</th>
-                  <th className="text-left p-4 font-medium text-gray-900">Email</th>
+                  <th className="text-left p-4 font-medium text-gray-900">Contact</th>
                   <th className="text-left p-4 font-medium text-gray-900">Role</th>
                   <th className="text-left p-4 font-medium text-gray-900">Login ID</th>
                   <th className="text-left p-4 font-medium text-gray-900">Status</th>
@@ -95,25 +63,28 @@ const StaffTable: React.FC<StaffTableProps> = ({
               </thead>
               <tbody>
                 {staff.map((staffMember) => (
-                  <tr key={staffMember.id} className="border-b hover:bg-gray-50 transition-colors">
+                  <tr key={staffMember._id} className="border-b hover:bg-gray-50 transition-colors">
                     <td className="p-4">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                           <Users className="h-4 w-4 text-blue-600" />
                         </div>
                         <div>
-                          <span className="font-medium text-gray-900">{staffMember.name}</span>
-                          <div className="text-xs text-gray-500">ID: {staffMember.id}</div>
+                          <span className="font-medium text-gray-900">{staffMember.fullName}</span>
+                          <div className="text-xs text-gray-500">Vendor-ID: {staffMember.vendorId}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-700">{staffMember.email}</td>
+                    <td className="p-4 text-gray-700">
+                      <div className="text-xs text-gray-500">{staffMember.contactNumber}</div>
+                      <div className="text-sm text-gray-500">{staffMember.email}</div>
+                    </td>
                     <td className="p-4">
                       <span className="capitalize text-gray-700">
                         {formatRoleName(staffMember.role)}
                       </span>
                     </td>
-                    <td className="p-4 text-gray-700 font-mono text-sm">{staffMember.loginId}</td>
+                    <td className="p-4 text-gray-700 font-mono text-sm">{staffMember.userId}</td>
                     <td className="p-4">
                       {getStatusBadge(staffMember.status)}
                     </td>
@@ -122,7 +93,7 @@ const StaffTable: React.FC<StaffTableProps> = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onEdit(staffMember)}
+                          // onClick={() => onEdit(staffMember)}
                           className="hover:bg-blue-50 hover:border-blue-300"
                         >
                           <Edit className="h-3 w-3 mr-1" />
@@ -131,7 +102,7 @@ const StaffTable: React.FC<StaffTableProps> = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onToggleStatus(staffMember.id)}
+                          // onClick={() => onToggleStatus(staffMember.id)}
                           className={`${staffMember.status === 'active'
                             ? 'text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300'
                             : 'text-green-500 hover:text-green-600 hover:bg-green-50 hover:border-green-300'
@@ -152,7 +123,7 @@ const StaffTable: React.FC<StaffTableProps> = ({
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => onDelete(staffMember.id)}
+                          // onClick={() => onDelete(staffMember.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
                         >
                           <Trash2 className="h-3 w-3 mr-1" />
@@ -169,7 +140,7 @@ const StaffTable: React.FC<StaffTableProps> = ({
       </div>
 
       {/* Tablet Table View - Hidden on large and small screens */}
-      <div className="hidden md:block lg:hidden">
+      {/* <div className="hidden md:block lg:hidden">
         <div className="rounded-md border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -206,8 +177,8 @@ const StaffTable: React.FC<StaffTableProps> = ({
                     <td className="p-3">
                       <div className="flex flex-col space-y-2">
                         <div className="flex space-x-1">
-                          <Button
-                            variant="outline"
+                          <Button 
+                            variant="outline" 
                             size="sm"
                             onClick={() => onEdit(staffMember)}
                             className="hover:bg-blue-50 hover:border-blue-300 text-xs"
@@ -215,14 +186,14 @@ const StaffTable: React.FC<StaffTableProps> = ({
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
                             onClick={() => onToggleStatus(staffMember.id)}
-                            className={`text-xs ${staffMember.status === 'active'
-                              ? 'text-red-500 hover:text-red-600 hover:bg-red-50'
+                            className={`text-xs ${staffMember.status === 'active' 
+                              ? 'text-red-500 hover:text-red-600 hover:bg-red-50' 
                               : 'text-green-500 hover:text-green-600 hover:bg-green-50'
-                              }`}
+                            }`}
                           >
                             {staffMember.status === 'active' ? (
                               <>
@@ -237,9 +208,9 @@ const StaffTable: React.FC<StaffTableProps> = ({
                             )}
                           </Button>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
                           onClick={() => onDelete(staffMember.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs w-full"
                         >
@@ -254,10 +225,10 @@ const StaffTable: React.FC<StaffTableProps> = ({
             </table>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Mobile Card View - Visible only on small screens */}
-      <div className="md:hidden space-y-4">
+      {/* <div className="md:hidden space-y-4">
         {staff.map((staffMember) => (
           <StaffCard
             key={staffMember.id}
@@ -267,9 +238,9 @@ const StaffTable: React.FC<StaffTableProps> = ({
             onDelete={onDelete}
           />
         ))}
-      </div>
+      </div> */}
     </>
   );
 };
 
-export default StaffTable;
+export default StaffTableNew;

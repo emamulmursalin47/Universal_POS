@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StaffFormData, StaffFormErrors } from '@/types/staff';
 import { validateStaffForm } from '@/utils/staffUtiils';
-import { STAFF_ROLES } from '@/constants/staff';
-
+import axios from 'axios';
 
 interface AddStaffModalProps {
   isOpen: boolean;
@@ -14,13 +13,19 @@ interface AddStaffModalProps {
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }) => {
+  // Extract role options from the StaffTypesNew type
+  const roleOptions = [
+    { value: 'admin', label: 'Admin' },
+    { value: 'manager', label: 'Manager' },
+    { value: 'staff', label: 'Staff' }
+  ];
   const [formData, setFormData] = useState<StaffFormData>({
-    id: '',
-    name: '',
-    role: '',
-    loginId: '',
+    email: '',
+    fullName: '',
+    contactNumber: '',
+    address: '',
     password: '',
-    email: ''
+    role: ''
   });
 
   const [errors, setErrors] = useState<StaffFormErrors>({});
@@ -31,7 +36,7 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
       ...prev,
       [field]: value
     }));
-    
+
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -40,29 +45,37 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
     }
   }, [errors]);
 
- 
   const handleSubmit = useCallback(async () => {
     const validationErrors = validateStaffForm(formData);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSave(formData);
-      
+      // Call the API endpoint
+      const response = await axios.post('/api/v1/shop-role/create-staff', formData, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = response.data;
+
+      onSave(result);
+
+      // Reset form
       setFormData({
-        id: '',
-        name: '',
-        role: '',
-        loginId: '',
+        email: '',
+        fullName: '',
+        contactNumber: '',
+        address: '',
         password: '',
-        email: ''
+        role: ''
       });
       setErrors({});
       onClose();
@@ -75,12 +88,12 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
 
   const handleClose = useCallback(() => {
     setFormData({
-      id: '',
-      name: '',
-      role: '',
-      loginId: '',
+      email: '',
+      fullName: '',
+      contactNumber: '',
+      address: '',
       password: '',
-      email: ''
+      role: ''
     });
     setErrors({});
     onClose();
@@ -95,19 +108,17 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Add New Staff Member</h2>
 
           <div className="space-y-4">
-           
-
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
                 Full Name <span className="text-red-500">*</span>
               </label>
               <Input
                 placeholder="Enter full name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className={errors.name ? 'border-red-500' : ''}
+                value={formData.fullName}
+                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                className={errors.fullName ? 'border-red-500' : ''}
               />
-              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+              {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
             </div>
 
             <div className="space-y-2">
@@ -126,17 +137,43 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">
+                Contact Number <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="tel"
+                placeholder="Enter contact number"
+                value={formData.contactNumber}
+                onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+                className={errors.contactNumber ? 'border-red-500' : ''}
+              />
+              {errors.contactNumber && <p className="text-sm text-red-500">{errors.contactNumber}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
+                Address <span className="text-red-500">*</span>
+              </label>
+              <Input
+                placeholder="Enter address"
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+                className={errors.address ? 'border-red-500' : ''}
+              />
+              {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">
                 Role <span className="text-red-500">*</span>
               </label>
               <select
                 value={formData.role}
                 onChange={(e) => handleInputChange('role', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.role ? 'border-red-500' : 'border-gray-300'
-                }`}
+                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${errors.role ? 'border-red-500' : 'border-gray-300'
+                  }`}
               >
                 <option value="">Select a role</option>
-                {STAFF_ROLES.map((role) => (
+                {roleOptions.map((role) => (
                   <option key={role.value} value={role.value}>
                     {role.label}
                   </option>
