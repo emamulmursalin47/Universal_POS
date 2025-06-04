@@ -1,30 +1,32 @@
 // pages/ShopsPage.tsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus, TrendingUp, TrendingDown, Clock, Users, Filter } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+// import { Plus } from 'lucide-react';
 
 // Components
-import { ShopCard } from '@/components/shop/ShopCard';
+// import { ShopCard } from '@/components/shop/ShopCard';
 import { ShopTable } from '@/components/shop/ShopTable';
-import { ShopSearch } from '@/components/shop/ShopSearch';
+// import { ShopSearch } from '@/components/shop/ShopSearch';
 
 // Hooks and Data
 // import { useShopActions } from '@/hooks/useShopActions';
 import { Shop } from '@/types/shop';
 // import { MOCK_SHOPS } from '@/data/MockShops';
 import { AddShopModal } from '@/components/modals/AddShopModal';
-import { EditShopModal } from '@/components/modals/EditShopModal';
-import { UpdateSubscriptionModal } from '@/components/modals/UpdateSubscriptionModal';
+// import { EditShopModal } from '@/components/modals/EditShopModal';
+// import { UpdateSubscriptionModal } from '@/components/modals/UpdateSubscriptionModal';
 import axios from 'axios';
 
 export default function ShopsPage() {
   // const [searchTerm, setSearchTerm] = useState<string>('');
   // const [statusFilter, setStatusFilter] = useState<string>('all');
-  // const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   // const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
   // const [isUpdateSubscriptionModalOpen, setIsUpdateSubscriptionModalOpen] = useState<boolean>(false);
-  const [selectedShop, setSelectedShop] = useState<Shop>([]);
+  const [selectedShop, setSelectedShop] = useState<Shop[]>([]);
 
   // const {  addShop, updateShoshopsp, deleteShop, toggleActive } = useShopActions(MOCK_SHOPS);
 
@@ -47,24 +49,26 @@ export default function ShopsPage() {
   // });
 
   // Calculate comprehensive statistics
-  // const stats = {
-  //   total: shops.length,
-  //   active: shops.filter(shop => shop.isActive && shop.subscriptionStatus === 'active').length,
-  //   expired: shops.filter(shop => shop.subscriptionStatus === 'expired').length,
-  //   inactive: shops.filter(shop => !shop.isActive).length,
-  //   trial: shops.filter(shop => shop.subscriptionStatus === 'trial').length,
-  //   premium: shops.filter(shop => shop.subscriptionPlan === 'premium').length,
-  //   standard: shops.filter(shop => shop.subscriptionPlan === 'standard').length,
-  //   basic: shops.filter(shop => shop.subscriptionPlan === 'basic').length
-  // };
+  const stats = {
+    total: 10,
+    active: 3,
+    expired: 2,
+    inactive: 1,
+    trial: 2,
+    premium: 1,
+    standard: 3,
+    basic: 2
+  };
 
-  const handleEditShop = (shop: Shop) => {
+  const handleEditShop = () => {
+    // const handleEditShop = (shop: Shop) => {
     // setSelectedShop(shop);
     // setIsEditModalOpen(true);
     console.log('handleEditShop called');
   };
 
-  const handleUpdateSubscription = (shop: Shop) => {
+  const handleUpdateSubscription = () => {
+    // const handleUpdateSubscription = (shop: Shop) => {
     console.log('handleUpdateSubscription called');
     // setSelectedShop(shop);
     // setIsUpdateSubscriptionModalOpen(true);
@@ -75,25 +79,22 @@ export default function ShopsPage() {
   //   setStatusFilter('all');
   // };
 
-  useEffect(() => {
-    const getShops = async () => {
-      try {
-        const response = await axios.get('/api/v1/user/get-all-shops',
-          {
-            headers: {
-              'Authorization': `${localStorage.getItem('accessToken')}`,
-            },
-          }
-        );
-        setSelectedShop(response.data.data);
-        // console.log(response.data.data);
-      } catch (error) {
-        console.error('Error fetching shops:', error);
-      }
-    };
-
-    getShops();
+  const getShops = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/v1/user/get-all-shops', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+        },
+      });
+      setSelectedShop(response.data.data);
+    } catch (error) {
+      console.error('Error fetching shops:', error);
+    }
   }, []);
+
+  useEffect(() => {
+    getShops();
+  }, [getShops]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -112,21 +113,21 @@ export default function ShopsPage() {
           </div>
 
           {/* Add Button - Updated to match SubscriptionsPage style */}
-          {/* <Button 
-            onClick={() => setIsAddModalOpen(true)} 
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
             size="lg"
             className="w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             <span className="sm:hidden">Add Shop</span>
             <span className="hidden sm:inline">Add New Shop</span>
-          </Button> */}
+          </Button>
         </div>
 
         {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 sm:gap-6">
           {/* Primary Stats */}
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-blue-500">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -140,9 +141,9 @@ export default function ShopsPage() {
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
 
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-green-500">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -156,9 +157,9 @@ export default function ShopsPage() {
                 <TrendingUp className="h-8 w-8 text-green-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
 
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-red-500">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -172,9 +173,9 @@ export default function ShopsPage() {
                 <Clock className="h-8 w-8 text-red-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
 
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-gray-500">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-gray-500">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -188,10 +189,10 @@ export default function ShopsPage() {
                 <TrendingDown className="h-8 w-8 text-gray-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
 
           {/* Additional Stats for larger screens */}
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-500 hidden xl:block">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-yellow-500 hidden xl:block">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -205,9 +206,9 @@ export default function ShopsPage() {
                 <Clock className="h-8 w-8 text-yellow-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
 
-          {/* <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 hidden xl:block">
+          <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-purple-500 hidden xl:block">
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -221,17 +222,28 @@ export default function ShopsPage() {
                 <TrendingUp className="h-8 w-8 text-purple-600" />
               </div>
             </CardContent>
-          </Card> */}
+          </Card>
         </div>
 
         {/* Main Content Card - Updated shadow and header styling */}
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-lg sm:text-xl lg:text-2xl">
-                {/* All Shops ({filteredShops.length}) */}
-                All Shops
-              </CardTitle>
+              <div className="flex items-center gap-2">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                  {/* All Shops ({filteredShops.length}) */}
+                  All Shops
+                </CardTitle>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="text-xs text-gray-600 hover:text-gray-800"
+                  onClick={getShops}
+                >
+                  <RefreshCw className="h-4 w-4 mx-2" />
+                </Button>
+              </div>
+
 
               {/* Quick Stats Pills */}
               <div className="flex flex-wrap gap-2">
@@ -335,8 +347,8 @@ export default function ShopsPage() {
               <ShopTable
                 shops={selectedShop}
                 onEdit={handleEditShop}
-                onDelete={()=>{}}
-                onToggleActive={()=>{}}
+                onDelete={() => { }}
+                onToggleActive={() => { }}
                 onUpdateSubscription={handleUpdateSubscription}
               />
             </div>
@@ -416,11 +428,11 @@ export default function ShopsPage() {
       </div>
 
       {/* Modals */}
-      {/* <AddShopModal
+      <AddShopModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAddShop={addShop}
-      /> */}
+        onAddShop={() => { setIsAddModalOpen(false); getShops(); }}
+      />
 
       {/* <EditShopModal
         isOpen={isEditModalOpen}

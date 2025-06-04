@@ -3,26 +3,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { addItem } from '@/redux/slices/cartSlice';
+// import { useDispatch } from 'react-redux';
+// import { addItem } from '@/redux/slices/cartSlice';
 import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/constants';
 import type { Product } from '@/lib/types';
 
 export function POSProductGrid() {
-  const dispatch = useDispatch();
+  // const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 25; // Show more items per page
 
   const handleAddToCart = (product: Product) => {
-    dispatch(addItem({ product, quantity: 1 }));
+    // dispatch(addItem({ product, quantity: 1 }));
   };
 
   const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         product.barcode?.includes(searchTerm) ||
-                         product.sku.includes(searchTerm);
+    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.barcode?.includes(searchTerm) ||
+      product.sku.includes(searchTerm);
     const matchesCategory = activeTab === 'all' || product.categoryId === activeTab;
     return matchesSearch && matchesCategory;
   });
@@ -84,7 +84,7 @@ export function POSProductGrid() {
             ))}
           </TabsList>
         </div>
-        
+
         <TabsContent value={activeTab} className="flex-1 mt-2 flex flex-col min-h-0">
           {/* Compact Results Summary */}
           <div className="flex justify-between items-center px-3 pb-2 text-xs text-muted-foreground">
@@ -111,11 +111,10 @@ export function POSProductGrid() {
                     currentProducts.map((product, index) => {
                       const stockStatus = getStockStatus(product.stock);
                       return (
-                        <tr 
-                          key={product.id} 
-                          className={`border-b hover:bg-accent cursor-pointer transition-colors text-sm ${
-                            index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
-                          }`}
+                        <tr
+                          key={product.id}
+                          className={`border-b hover:bg-accent cursor-pointer transition-colors text-sm ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
+                            }`}
                           onClick={() => handleAddToCart(product)}
                         >
                           <td className="p-2">
@@ -173,7 +172,7 @@ export function POSProductGrid() {
                 <ChevronLeft className="h-3 w-3 mr-1" />
                 Prev
               </Button>
-              
+
               <div className="flex items-center gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
@@ -186,7 +185,7 @@ export function POSProductGrid() {
                   } else {
                     pageNum = currentPage - 2 + i;
                   }
-                  
+
                   return (
                     <Button
                       key={pageNum}
@@ -200,7 +199,7 @@ export function POSProductGrid() {
                   );
                 })}
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"

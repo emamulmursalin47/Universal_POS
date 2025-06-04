@@ -1,6 +1,6 @@
 // types/shop.ts
 export type SubscriptionPlan = 'basic' | 'standard' | 'premium';
-export type SubscriptionStatus = 'active' | 'expired' | 'trial';
+export type SubscriptionStatus = 'active' | 'inactive' | 'expired' | 'trial' | 'pending';;
 
 export interface Shop {
   id: number;
@@ -48,8 +48,12 @@ export interface UpdateSubscriptionData {
 
 export interface ShopCardProps {
   shop: Shop;
+  // onEdit: (shop: Shop) => void;
+  // onDelete: (id: number) => void;
+  // onToggleActive: (id: number, isActive: boolean) => void;
+  // onUpdateSubscription: (shop: Shop) => void;
   onEdit: (shop: Shop) => void;
-  onDelete: (id: number) => void;
-  onToggleActive: (id: number, isActive: boolean) => void;
+  onDelete: (vendorId: Shop["vendorId"]) => void;
+  onToggleActive: (id: number, status: Shop["status"]) => void;
   onUpdateSubscription: (shop: Shop) => void;
 }

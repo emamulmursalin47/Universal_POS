@@ -4,7 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { useNavigate } from 'react-router-dom';
-import { Users, Store, CreditCard, Settings } from 'lucide-react';
+import { Users, Store, CreditCard } from 'lucide-react';
 import { jwtDecode } from 'jwt-decode';
 import type { DecodedToken } from '@/lib/types';
 

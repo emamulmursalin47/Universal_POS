@@ -3,10 +3,11 @@ import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
-import { ActiveSubscription, SubscriptionPlan } from '@/types/subscription';
+// import { ActiveSubscription, SubscriptionPlan } from '@/types/subscription';
+import { SubscriptionPlan } from '@/types/subscription';
 // import { useSubscriptionPlans } from '@/hooks/useSubscriptionPlans';
 import { SubscriptionPlansGrid } from '@/components/grids/SubscriptionGrids';
-import { SubscriptionsTable } from '@/components/tables/SubscriptionTable';
+// import { SubscriptionsTable } from '@/components/tables/SubscriptionTable';
 import { CreatePlanModal } from '@/components/modals/CreatePlanModal';
 import { EditPlanModal } from '@/components/modals/EditPlanModal';
 import { DeleteConfirmModal } from '@/components/modals/DeleteConfirmModal';
@@ -52,12 +53,13 @@ export default function SubscriptionsPage() {
   const [planToEdit, setPlanToEdit] = useState<SubscriptionPlan | null>(null);
   const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(null);
 
-  const handleCreatePlan = useCallback(() => {
-    console.log('Create plan: called');
-  }, []);
+  const handleCreatePlan = async () => {
+    await fetchPlans();
+  };
 
-  const handleEditPlan = useCallback(() => {
+  const handleEditPlan = useCallback((plan:SubscriptionPlan) => {
     console.log('Edit plan: called');
+    console.log(plan)
     setIsEditModalOpen(true);
   }, []);
 
@@ -108,23 +110,25 @@ export default function SubscriptionsPage() {
 
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
 
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const response = await axios.get('/api/v1/subscription', {
-          headers: {
-            'Authorization': `${localStorage.getItem('accessToken')}`,
-          },
-        });
-        const data = await response.data.data;
-        setSubscriptionPlans(data);
-        console.log(subscriptionPlans);
-      } catch (error) {
-        console.error('Error fetching plans:', error);
-      }
+  const fetchPlans = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/v1/subscription', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+        },
+      });
+      const data = await response.data.data;
+      setSubscriptionPlans(data);
+      // console.log(subscriptionPlans);
+    } catch (error) {
+      console.error('Error fetching plans:', error);
     }
+  }
+    , []);
+  useEffect(() => {
+
     fetchPlans();
-  }, []);
+  }, [fetchPlans]);
 
 
   return (
@@ -144,7 +148,7 @@ export default function SubscriptionsPage() {
           </div>
 
           {/* Add Button - Full width on mobile */}
-          {/* <Button 
+          <Button
             onClick={() => setIsCreateModalOpen(true)}
             size="lg"
             className="w-full sm:w-auto"
@@ -152,7 +156,7 @@ export default function SubscriptionsPage() {
             <Plus className="h-4 w-4 mr-2" />
             <span className="sm:hidden">Create Plan</span>
             <span className="hidden sm:inline">Create New Plan</span>
-          </Button> */}
+          </Button>
         </div>
 
         {/* Subscription Plans Section */}
@@ -193,7 +197,7 @@ export default function SubscriptionsPage() {
         isOpen={isEditModalOpen}
         onClose={handleCloseEditModal}
         onUpdatePlan={handleUpdatePlan}
-        planToEdit={planToEdit}
+        planToEdit={planToEdit} 
       />
 
       <DeleteConfirmModal

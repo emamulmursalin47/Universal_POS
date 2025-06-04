@@ -7,7 +7,7 @@ import CategoriesPage from '@/pages/vendor-admin/CategoriesPage';
 import SalesPage from '@/pages/vendor-admin/SalesPage';
 import StaffPage from '@/pages/vendor-admin/StaffPage';
 import CustomersPage from '@/pages/vendor-admin/CustomersPage';
-import SettingsPage from '@/pages/super-admin/SettingsPage';
+// import SettingsPage from '@/pages/super-admin/SettingsPage';
 import InventoryPage from '@/pages/vendor-admin/InventoryPage';
 
 export const vendorAdminRoutes = [
@@ -43,10 +43,10 @@ export const vendorAdminRoutes = [
         path: "customers",
         element: <CustomersPage />
       },
-      {
-        path: "settings",
-        element: <SettingsPage />
-      }
+      // {
+      //   path: "settings",
+      //   element: <SettingsPage />
+      // }
     ]
   }
 ];

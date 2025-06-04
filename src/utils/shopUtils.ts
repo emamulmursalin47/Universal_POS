@@ -1,15 +1,16 @@
 // utils/shopUtils.ts
+import { Shop } from '@/lib/types';
 import { SubscriptionStatus, SubscriptionPlan } from '@/types/shop';
 
-export const getStatusColor = (status: SubscriptionStatus): string => {
-  const statusColors: Record<SubscriptionStatus, string> = {
-    'active': 'bg-green-100 text-green-800',
-    'expired': 'bg-red-100 text-red-800',
-    'trial': 'bg-yellow-100 text-yellow-800'
-  };
+// export const getStatusColor = (status: SubscriptionStatus): string => {
+//   const statusColors: Record<SubscriptionStatus, string> = {
+//     'active': 'bg-green-100 text-green-800',
+//     'expired': 'bg-red-100 text-red-800',
+//     'trial': 'bg-yellow-100 text-yellow-800'
+//   };
   
-  return statusColors[status] || 'bg-gray-100 text-gray-800';
-};
+//   return statusColors[status] || 'bg-gray-100 text-gray-800';
+// };
 
 export const getPlanBadgeColor = (plan: SubscriptionPlan): string => {
   const planColors: Record<SubscriptionPlan, string> = {
@@ -21,8 +22,8 @@ export const getPlanBadgeColor = (plan: SubscriptionPlan): string => {
   return planColors[plan] || 'bg-gray-100 text-gray-800';
 };
 
-export const getActiveStatusColor = (isActive: boolean): string => {
-  return isActive 
+export const getActiveStatusColor = (status: Shop["status"]): string => {
+  return status
     ? 'bg-emerald-100 text-emerald-800' 
     : 'bg-gray-100 text-gray-800';
 };

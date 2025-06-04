@@ -164,7 +164,7 @@ export function LoginForm() {
                     <div className="relative">
                       <AtSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="email@example.com"
+                        placeholder="Enter Username"
                         className="pl-10"
                         disabled={isLoading}
                         {...field}
@@ -208,7 +208,7 @@ export function LoginForm() {
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex flex-col space-y-4">
+      {/* <CardFooter className="flex flex-col space-y-4">
         <div className="text-sm text-muted-foreground text-center">
           <p>Sample Credentials (for demo purposes)</p>
           <div className="grid grid-cols-2 gap-2 mt-2 text-xs">
@@ -230,7 +230,7 @@ export function LoginForm() {
             </div>
           </div>
         </div>
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   );
 }

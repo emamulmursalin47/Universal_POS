@@ -4,7 +4,7 @@ import { SuperAdminLayout } from '@/components/layout/SuperAdminLayout';
 import SuperAdminDashboard from '@/pages/super-admin/SuperAdminDashboard';
 import ShopsPage from '@/pages/super-admin/ShopsPage';
 import SubscriptionsPage from '@/pages/super-admin/SubscriptionsPage';
-import SettingsPage from '@/pages/super-admin/SettingsPage';
+// import SettingsPage from '@/pages/super-admin/SettingsPage';
 
 export const superAdminRoutes = [
   {

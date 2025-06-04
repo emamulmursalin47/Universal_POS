@@ -1,8 +1,10 @@
 import { Outlet } from 'react-router-dom';
-import { useRoleRedirect } from '@/hooks/useRoleRedirect';
+// import { useRoleRedirect } from '@/hooks/useRoleRedirect';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { ShoppingCart, Receipt, BarChart3, User } from 'lucide-react';
+import { jwtDecode } from 'jwt-decode';
+import type { DecodedToken } from '@/lib/types';
 
 const menuItems = [
   {
@@ -28,17 +30,27 @@ const menuItems = [
 ];
 
 export function CashierLayout() {
-  const { isLoading } = useRoleRedirect(['cashier']);
+  // const { user } = useAuth();
+  const accessToken = localStorage.getItem('accessToken');
+  const decoded: DecodedToken = jwtDecode(accessToken as string);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
+  if (decoded.role !== 'manager') {
+    localStorage.removeItem('accessToken');
+    window.location.href = '/login';
   }
+
+
+  // const { isLoading } = useRoleRedirect(['cashier']);
+
+  // if (isLoading) {
+  //   return <div>Loading...</div>;
+  // }
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar menuItems={menuItems} />
+      <Sidebar menuItems={menuItems} accessToken={accessToken as string} />
       <div className="flex flex-col flex-1 overflow-hidden">
-        <Header title="Cashier Dashboard" />
+        <Header title="Sell Dashboard" accessToken={accessToken as string} />
         <main className="flex-1 overflow-y-auto p-4">
           <Outlet />
         </main>

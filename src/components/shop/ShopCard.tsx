@@ -4,12 +4,12 @@ import { Building2, Mail, Phone, Calendar, User, MapPin } from 'lucide-react';
 import { ShopCardProps } from '@/types/shop';
 import { ShopActionMenu } from './ShopActionMenu';
 import { 
-  getStatusColor, 
-  getPlanBadgeColor, 
-  getActiveStatusColor, 
+  // getStatusColor, 
+  // getPlanBadgeColor, 
+  // getActiveStatusColor, 
   formatDate, 
-  formatPlanName, 
-  formatStatusName,
+  // formatPlanName, 
+  // formatStatusName,
   getDeadlineStatus
 } from '@/utils/shopUtils';
 
@@ -20,7 +20,7 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
   onToggleActive, 
   onUpdateSubscription 
 }) => {
-  const deadlineInfo = getDeadlineStatus(shop.deadline);
+  const deadlineInfo = getDeadlineStatus(shop.subscriptionDeadline);
 
   return (
     <div className={`bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden ${
@@ -47,15 +47,15 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
               </h3>
               
               {/* Status Badges */}
-              <div className="flex flex-wrap gap-2 mb-2">
+              {/* <div className="flex flex-wrap gap-2 mb-2">
                 <span 
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getActiveStatusColor(shop.isActive)}`}
-                  title={`Shop Status: ${shop.isActive ? 'Active' : 'Inactive'}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getActiveStatusColor(shop.status)}`}
+                  title={`Shop Status: ${shop.status}`}
                 >
                   {shop.isActive ? 'Active' : 'Inactive'}
                 </span>
                 <span 
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(shop.subscriptionStatus)}`}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(shop.status)}`}
                   title={`Subscription: ${formatStatusName(shop.subscriptionStatus)}`}
                 >
                   {formatStatusName(shop.subscriptionStatus)}
@@ -66,7 +66,7 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
                 >
                   {formatPlanName(shop.subscriptionPlan)}
                 </span>
-              </div>
+              </div> */}
             </div>
           </div>
           
@@ -179,7 +179,7 @@ export const ShopCard: React.FC<ShopCardProps> = memo(({
                 <div>
                   <p className="text-xs text-gray-500">Deadline</p>
                   <p className={`text-sm font-medium ${deadlineInfo.color}`}>
-                    {formatDate(shop.deadline)}
+                    {formatDate(shop.subscriptionDeadline)}
                   </p>
                 </div>
               </div>

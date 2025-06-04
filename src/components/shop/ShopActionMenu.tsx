@@ -6,8 +6,8 @@ import { Shop } from '@/types/shop';
 interface ShopActionMenuProps {
   shop: Shop;
   onEdit: (shop: Shop) => void;
-  onDelete: (id: number) => void;
-  onToggleActive: (id: number, isActive: boolean) => void;
+  onDelete: (vendorId: Shop["vendorId"]) => void;
+  onToggleActive: (id: number, status: Shop["status"]) => void;
   onUpdateSubscription: (shop: Shop) => void;
 }
 
@@ -45,12 +45,12 @@ export const ShopActionMenu: React.FC<ShopActionMenuProps> = ({
   };
 
   const handleDelete = () => {
-    onDelete(shop.id);
+    onDelete(shop.vendorId);
     setShowActions(false);
   };
 
   const handleToggleActive = () => {
-    onToggleActive(shop.id, !shop.isActive);
+    onToggleActive(shop.id, shop.status);
     setShowActions(false);
   };
 
