@@ -7,8 +7,8 @@ import { Shop } from '@/types/shop';
 interface ShopTableActionsProps {
   shop: Shop;
   onEdit: (shop: Shop) => void;
-  onDelete: (id: number) => void;
-  onToggleActive: (id: number, isActive: boolean) => void;
+  onDelete: (vendorId: Shop["vendorId"]) => void;
+  onToggleActive: (id: number, status: Shop["status"]) => void;
   onUpdateSubscription: (shop: Shop) => void;
 }
 
@@ -40,15 +40,15 @@ export const ShopTableActions: React.FC<ShopTableActionsProps> = ({
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onToggleActive(shop.id, !shop.isActive)}
-        title={shop.isActive ? 'Deactivate' : 'Activate'}
+        onClick={() => onToggleActive(shop.id, shop.status)}
+        title={shop.status ? 'Deactivate' : 'Activate'}
       >
         <Power className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
         size="sm"
-        onClick={() => onDelete(shop.id)}
+        onClick={() => onDelete(shop.vendorId)}
         title="Delete Shop"
         className="text-red-600 hover:text-red-800"
       >

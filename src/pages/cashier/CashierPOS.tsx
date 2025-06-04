@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { POSCart } from '@/components/cashier/POSCart';
 import { POSProductGrid } from '@/components/cashier/POSProductGrid';
-import { useAuth } from '@/hooks/useAuth';
-import { MOCK_SHOPS } from '@/lib/constants';
+// import { useAuth } from '@/hooks/useAuth';
+// import { MOCK_SHOPS } from '@/lib/constants';
+import RealTimeClock from '@/lib/realTimeClock';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,11 +14,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
+import {
 
-  Phone, 
-  UserPlus, 
-  Search, 
+  Phone,
+  UserPlus,
+  Search,
   X,
   Edit,
   Check
@@ -69,8 +70,8 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [customers] = useState<Customer[]>(MOCK_CUSTOMERS);
 
-  const filteredCustomers = customers.filter(customer => 
-    customer.phone.includes(phoneSearch) || 
+  const filteredCustomers = customers.filter(customer =>
+    customer.phone.includes(phoneSearch) ||
     customer.name.toLowerCase().includes(phoneSearch.toLowerCase())
   );
 
@@ -87,7 +88,7 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
 
   const handleAddNewCustomer = () => {
     if (!newCustomer.name || !newCustomer.phone) return;
-    
+
     const customer: Customer = {
       id: Date.now().toString(),
       name: newCustomer.name,
@@ -96,7 +97,7 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
       totalPurchases: 0,
       lastVisit: new Date().toISOString().split('T')[0]
     };
-    
+
     // In real app, this would be an API call
     customers.push(customer);
     onCustomerSelect(customer);
@@ -128,9 +129,9 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
               <Edit className="h-3 w-3" />
             </Button>
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="h-7 w-7 p-0 text-red-500 hover:text-red-700"
               onClick={removeCustomer}
             >
@@ -214,17 +215,17 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
                       <Input
                         placeholder="Customer Name *"
                         value={newCustomer.name}
-                        onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
                       />
                       <Input
                         placeholder="Phone Number *"
                         value={newCustomer.phone}
-                        onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
                       />
                       <Input
                         placeholder="Email (Optional)"
                         value={newCustomer.email}
-                        onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                        onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
                       />
                     </div>
                     <div className="flex gap-2">
@@ -262,43 +263,44 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
 }
 
 export default function CashierPOS() {
-  const { user } = useAuth();
+  // const { user } = useAuth();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  
+
   // In a real app, we would fetch the shop data from API
-  const shopData = user?.shopId 
-    ? MOCK_SHOPS.find(shop => shop.id === user.shopId) 
-    : null;
-  
+  // const shopData = user?.shopId 
+  //   ? MOCK_SHOPS.find(shop => shop.id === user.shopId) 
+  //   : null;
+
   return (
     <div className="h-screen flex flex-col p-4 gap-3 overflow-hidden">
       {/* Compact Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold">Point of Sale</h1>
-          {shopData && (
+          {/* {shopData && (
             <p className="text-sm text-muted-foreground">{shopData.name}</p>
-          )}
+          )} */}
         </div>
         <div className="text-right text-sm text-muted-foreground">
-          {new Date().toLocaleDateString()} | {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+          {/* {new Date().toLocaleDateString()} | {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})} */}
+          <RealTimeClock />
         </div>
       </div>
-      
+
       {/* Compact Customer Bar */}
-      <CustomerSelector 
+      <CustomerSelector
         selectedCustomer={selectedCustomer}
         onCustomerSelect={setSelectedCustomer}
       />
-      
+
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0">
         <div className="lg:col-span-2 min-h-0">
           <POSProductGrid />
         </div>
-        <div className="min-h-0">
+        {/* <div className="min-h-0">
           <POSCart  />
-        </div>
+        </div> */}
       </div>
     </div>
   );

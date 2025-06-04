@@ -11,8 +11,8 @@ import { Link } from 'react-router-dom';
 interface ShopTableProps {
   shops: Shop[];
   onEdit: (shop: Shop) => void;
-  onDelete: (id: number) => void;
-  onToggleActive: (id: number, isActive: boolean) => void;
+  onDelete: (vendorId: Shop["vendorId"]) => void;
+  onToggleActive: (id: number, status: Shop["status"]) => void;
   onUpdateSubscription: (shop: Shop) => void;
 }
 
@@ -35,21 +35,21 @@ export const ShopTable: React.FC<ShopTableProps> = ({
               <TableHead className="font-semibold text-gray-900">Address</TableHead>
               <TableHead className="font-semibold text-gray-900">Owner Info</TableHead>
               <TableHead className="font-semibold text-gray-900">Subscription</TableHead>
-              <TableHead className="font-semibold text-gray-900">Status</TableHead>
+              {/* <TableHead className="font-semibold text-gray-900">Status</TableHead> */}
               <TableHead className="font-semibold text-gray-900">Active</TableHead>
               <TableHead className="font-semibold text-gray-900">Deadline</TableHead>
-              <TableHead className="font-semibold text-gray-900">Created</TableHead>
-              <TableHead className="font-semibold text-gray-900">Updated</TableHead>
+              <TableHead className="font-semibold text-gray-900">Created / Updated</TableHead>
+              {/* <TableHead className="font-semibold text-gray-900">Price</TableHead> */}
               <TableHead className="font-semibold text-gray-900 text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {shops.map((shop: Shop, index) => {
-              // const deadlineInfo = getDeadlineStatus(shop.deadline);
+              const deadlineInfo = getDeadlineStatus(shop.subscriptionDeadline);
               return (
                 <TableRow
                   key={index}
-                  className={`hover:bg-gray-50 transition-colors border-b border-gray-100 ${!shop.isActive ? 'opacity-60' : ''
+                  className={`hover:bg-gray-50 transition-colors border-b border-gray-100 ${shop.status != 'active' ? 'opacity-60' : ''
                     } ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}
                 >
                   <TableCell className="py-4">
@@ -61,13 +61,13 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                       <div className="min-w-0">
                         <div className="font-semibold text-sm text-gray-900 truncate">{shop?.shopName}</div>
                         <div className="text-xs text-gray-500 truncate">
-                          <Link to='mailto:{shop.email}' className='hover:text-blue-600 text-gray-500' title={shop.email}>
+                          <Link to={'mailto:' + shop.email} className='hover:text-blue-600 text-gray-500' title={shop.email}>
                             {shop.email}
                           </Link>
                         </div>
                         <div className="text-xs text-gray-500 truncate">
-                          <Link to='tel:+88{shop.contactNumber}' className='hover:text-blue-600 text-gray-500' title={shop.contactNumber}>
-                           {shop.contactNumber && `+88${shop.contactNumber}`}
+                          <Link to={'tel:+88' + shop.contactNumber} className='hover:text-blue-600 text-gray-500' title={'+88'+shop.contactNumber}>
+                            {shop.contactNumber && `+88${shop.contactNumber}`}
                           </Link>
                         </div>
                       </div>
@@ -98,25 +98,24 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                     {shop.subscriptionPlan}
                   </TableCell>
 
-                  <TableCell>
+                  {/* <TableCell>
                     <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${shop.status === 'active' ? 'bg-green-100 text-green-800' :
                       shop.status === 'expired' ? 'bg-red-100 text-red-800' :
                         'bg-yellow-100 text-yellow-800'
                       }`}>
                       {shop.status}
                     </span>
-                  </TableCell>
+                  </TableCell> */}
 
                   <TableCell>
-                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold ${shop.isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
+                    <span className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold capitalize ${shop.status === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-800'
                       }`}>
-                      {shop.isActive ? 'Active' : 'Inactive'}
+                      {shop.status}
                     </span>
                   </TableCell>
 
                   <TableCell>
                     <div className="space-y-1">
-
                       <div className="text-sm font-medium text-gray-900">
                         {new Date(shop.subscriptionDeadline).toLocaleDateString('en-GB', {
                           day: '2-digit',
@@ -124,26 +123,27 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                           year: 'numeric'
                         })}
                       </div>
-                      {/* <div className={`text-xs font-medium ${deadlineInfo.color}`}>
+                      <div className={`text-xs font-medium ${deadlineInfo.color}`}>
                         {deadlineInfo.text}
-                      </div> */}
+                      </div>
                     </div>
                   </TableCell>
 
                   <TableCell className="text-sm text-gray-900">
-                    {new Date(shop.createdAt).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        })}
-                  </TableCell>
+                    C: {new Date(shop.createdAt).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                    <br />
+                    {/* </TableCell>
 
-                  <TableCell className="text-sm text-gray-900">
-                    {shop.updatedAt ? new Date(shop.updatedAt).toLocaleDateString('en-GB', {
-                          day: '2-digit',
-                          month: 'short',
-                          year: 'numeric'
-                        }) : '-'}
+                  <TableCell className="text-sm text-gray-900"> */}
+                    U: {shop.updatedAt ? new Date(shop.updatedAt).toLocaleDateString('en-GB', {
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
+                    }) : '-'}
                   </TableCell>
 
                   <TableCell>
@@ -175,7 +175,7 @@ export const ShopTable: React.FC<ShopTableProps> = ({
           </TableHeader>
           <TableBody>
             {shops.map((shop: Shop, index: number) => {
-              const deadlineInfo = getDeadlineStatus(shop.deadline);
+              const deadlineInfo = getDeadlineStatus(shop.subscriptionDeadline);
               return (
                 <TableRow
                   key={index}
@@ -226,11 +226,11 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                           }`}>
                           {shop.isActive ? 'Active' : 'Inactive'}
                         </span>
-                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${shop.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                          shop.subscriptionStatus === 'expired' ? 'bg-red-100 text-red-800' :
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${shop.status === 'active' ? 'bg-green-100 text-green-800' :
+                          shop.status === 'expired' ? 'bg-red-100 text-red-800' :
                             'bg-yellow-100 text-yellow-800'
                           }`}>
-                          {shop.subscriptionStatus}
+                          {shop.status}
                         </span>
                       </div>
 
@@ -243,7 +243,7 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                   <TableCell>
                     <div className="space-y-2">
                       <div className="text-sm font-medium text-gray-900">
-                        {new Date(shop.deadline).toLocaleDateString()}
+                        {new Date(shop.subscriptionDeadline).toLocaleDateString()}
                       </div>
                       <div className={`text-xs font-medium ${deadlineInfo.color}`}>
                         {deadlineInfo.text}
@@ -278,10 +278,10 @@ export const ShopTable: React.FC<ShopTableProps> = ({
           </TableHeader>
           <TableBody>
             {shops.map((shop, index) => {
-              const deadlineInfo = getDeadlineStatus(shop.deadline);
+              const deadlineInfo = getDeadlineStatus(shop.subscriptionDeadline);
               return (
                 <TableRow
-                  key={shop.id}
+                  key={index}
                   className={`hover:bg-gray-50 transition-colors border-b border-gray-100 ${!shop.isActive ? 'opacity-60' : ''
                     } ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}
                 >
@@ -324,11 +324,11 @@ export const ShopTable: React.FC<ShopTableProps> = ({
                           }`}>
                           {shop.isActive ? 'Active' : 'Inactive'}
                         </span>
-                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${shop.subscriptionStatus === 'active' ? 'bg-green-100 text-green-800' :
-                          shop.subscriptionStatus === 'expired' ? 'bg-red-100 text-red-800' :
+                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${shop.status === 'active' ? 'bg-green-100 text-green-800' :
+                          shop.status === 'expired' ? 'bg-red-100 text-red-800' :
                             'bg-yellow-100 text-yellow-800'
                           }`}>
-                          {shop.subscriptionStatus}
+                          {shop.status}
                         </span>
                         <span className="inline-flex px-2 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 capitalize">
                           {shop.subscriptionPlan}
@@ -337,7 +337,7 @@ export const ShopTable: React.FC<ShopTableProps> = ({
 
                       <div className="text-xs text-gray-600 ml-13">
                         <div className="mb-1">
-                          <span className="font-medium">Deadline:</span> {new Date(shop.deadline).toLocaleDateString()}
+                          <span className="font-medium">Deadline:</span> {new Date(shop.subscriptionDeadline).toLocaleDateString()}
                         </div>
                         <div className={`font-medium ${deadlineInfo.color}`}>
                           {deadlineInfo.text}

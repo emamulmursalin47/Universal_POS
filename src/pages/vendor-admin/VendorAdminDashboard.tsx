@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatsCard } from '@/components/ui/statistics/StatsCard';
-import { Package, ShoppingCart, DollarSign, TrendingUp, BarChart, Plus } from 'lucide-react';
+import { Package, ShoppingCart, DollarSign, TrendingUp, Plus } from 'lucide-react';
 import { MOCK_PRODUCTS, MOCK_SALES } from '@/lib/constants';
 
 export default function VendorAdminDashboard() {
