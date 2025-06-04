@@ -86,13 +86,21 @@ export interface Customer {
 
 export interface SubscriptionPlan {
   id: string;
-  name: string;
+  name?: string;
+  // supportLevel: 'basic' | 'standard' | 'premium';
+  _id: string;
+  planName: string;
   price: number;
-  billingCycle: 'monthly' | 'yearly';
-  features: string[];
+  description?: string;
+  billingCycle: string[] | 'monthly' | 'yearly' | 'quarterly'; // assuming these are the only two options
   maxProducts: number;
   maxUsers: number;
-  supportLevel: 'basic' | 'standard' | 'premium';
+  supportLevel: string;
+  features: string[];
+  status: 'active' | 'inactive'; // assuming a limited set of statuses
+  createdAt: string; // or `Date` if parsed
+  updatedAt: string; // or `Date` if parsed
+
 }
 
 export interface DecodedToken {

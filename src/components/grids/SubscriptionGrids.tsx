@@ -7,7 +7,7 @@ import { PlanCard } from '../cards/SubscriptionPlanCard';
 interface SubscriptionPlansGridProps {
   plans: SubscriptionPlan[];
   onEditPlan: (plan: SubscriptionPlan) => void; // onEditplan: SubscriptionPlan;
-  onViewPlan: (plan: SubscriptionPlan) => void;
+  // onViewPlan: (plan: SubscriptionPlan) => void;
   onToggleStatus: (planId: string) => void;
   onDeletePlan: (planId: string) => void;
 }
@@ -15,7 +15,7 @@ interface SubscriptionPlansGridProps {
 export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
   plans,
   onEditPlan,
-  onViewPlan,
+  // onViewPlan,
   onToggleStatus,
   onDeletePlan,
 }) => {
@@ -26,7 +26,7 @@ export const SubscriptionPlansGrid: React.FC<SubscriptionPlansGridProps> = ({
           key={index}
           plan={plan}
           onEdit={onEditPlan}
-          onView={onViewPlan}
+          // onView={onViewPlan}
           onToggleStatus={onToggleStatus}
           onDelete={onDeletePlan}
         />

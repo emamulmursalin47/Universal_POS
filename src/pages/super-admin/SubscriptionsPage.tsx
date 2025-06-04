@@ -57,51 +57,59 @@ export default function SubscriptionsPage() {
     await fetchPlans();
   };
 
-  const handleEditPlan = useCallback((plan:SubscriptionPlan) => {
+  const handleEditPlan = useCallback((plan: SubscriptionPlan) => {
     console.log('Edit plan: called');
-    console.log(plan)
+    console.log(plan);
+    setPlanToEdit(plan); // Add this line - you were missing this!
     setIsEditModalOpen(true);
   }, []);
 
-  const handleUpdatePlan = useCallback(() => {
-    // updatePlan(updatedPlan);
-    console.log('Update plan: called');
-    setPlanToEdit(null);
-    setIsEditModalOpen(false);
-  }, []);
+  // const handleUpdatePlan = useCallback(() => {
+  //   // updatePlan(updatedPlan);
+  //   console.log('Update plan: called');
+  //   setPlanToEdit(null);
+  //   setIsEditModalOpen(false);
+  // }, []);
 
-  const handleViewPlan = useCallback((plan: SubscriptionPlan) => {
-    console.log('View plan:', plan);
-    // TODO: Implement view plan functionality (could open a read-only modal)
-  }, []);
+  // const handleViewPlan = useCallback((plan: SubscriptionPlan) => {
+  //   console.log('View plan:', plan);
+  //   // TODO: Implement view plan functionality (could open a read-only modal)
+  // }, []);
 
   const handleToggleStatus = useCallback(() => {
     // togglePlanStatus(planId);
     console.log('Toggle status: called');
   }, []);
 
-  const handleDeletePlan = useCallback(() => {
-    // const planToDelete = plans.find(p => p.id === planId);
-    // if (planToDelete) {
-    //   setPlanToDelete(planToDelete);
-    //   setIsDeleteModalOpen(true);
-    // }
+  const handleDeletePlan = (planId: string) => {
     console.log('Delete plan: called');
-  }, []);
-
-  const confirmDeletePlan = useCallback(() => {
+    const planToDelete = subscriptionPlans.find(p => p._id === planId);
     if (planToDelete) {
-      // deletePlan(planToDelete.id);
-      console.log('Confirm delete plan: called');
+      console.log('planToDelete:', planToDelete);
+      setPlanToDelete(planToDelete);
+      setIsDeleteModalOpen(true);
+    }
+    // console.log(planId);
+  };
+
+  const confirmDeletePlan = async () => {
+    if (planToDelete) {
+      try {
+        await axios.delete(`/api/v1/subscription/delete/${planToDelete._id}`, {
+          headers: {
+            'Authorization': `${localStorage.getItem('accessToken')}`,
+          },
+        });
+      } catch (error) {
+        console.error(`Error Deleting plans:${planToDelete.planName}: `, error);
+      }
+      await fetchPlans();
       setPlanToDelete(null);
       setIsDeleteModalOpen(false);
     }
-  }, [planToDelete]);
+  };
 
-  const handleCloseEditModal = useCallback(() => {
-    setPlanToEdit(null);
-    setIsEditModalOpen(false);
-  }, []);
+
 
   const handleCloseDeleteModal = useCallback(() => {
     setPlanToDelete(null);
@@ -130,6 +138,11 @@ export default function SubscriptionsPage() {
     fetchPlans();
   }, [fetchPlans]);
 
+  const handleCloseEditModal = useCallback(() => {
+    setPlanToEdit(null);
+    setIsEditModalOpen(false);
+    // await fetchPlans();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -168,7 +181,7 @@ export default function SubscriptionsPage() {
             <SubscriptionPlansGrid
               plans={subscriptionPlans}
               onEditPlan={handleEditPlan}
-              onViewPlan={handleViewPlan}
+              // onViewPlan={handleViewPlan}
               onToggleStatus={handleToggleStatus}
               onDeletePlan={handleDeletePlan}
             />
@@ -193,12 +206,14 @@ export default function SubscriptionsPage() {
         onCreatePlan={handleCreatePlan}
       />
 
-      <EditPlanModal
-        isOpen={isEditModalOpen}
-        onClose={handleCloseEditModal}
-        onUpdatePlan={handleUpdatePlan}
-        planToEdit={planToEdit} 
-      />
+      {planToEdit && (
+        <EditPlanModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onUpdatePlan={fetchPlans}
+          planToEdit={planToEdit}
+        />
+      )}
 
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}

@@ -3,14 +3,15 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Users, Package, Headphones, Edit, Eye, MoreVertical, Power, Trash2 } from 'lucide-react';
-import { SubscriptionPlan } from '../../types/subscription';
+// import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+// import { Users, Package, Headphones, Edit, MoreVertical, Power, Trash2 } from 'lucide-react';
+import { Users, Package, Headphones, Edit, Power, Trash2 } from 'lucide-react';
+import { SubscriptionPlan } from '@/types/subscription';
 
 interface PlanCardProps {
   plan: SubscriptionPlan;
   onEdit: (plan: SubscriptionPlan) => void;
-  onView: (plan: SubscriptionPlan) => void;
+  // onView: (plan: SubscriptionPlan) => void;
   onToggleStatus: (planId: string) => void;
   onDelete: (planId: string) => void;
 }
@@ -46,7 +47,7 @@ const getBillingCycleLabel = (cycle: SubscriptionPlan['billingCycle']) => {
 export const PlanCard: React.FC<PlanCardProps> = ({
   plan,
   onEdit,
-  onView,
+  // onView,
   onToggleStatus,
   onDelete
 }) => {
@@ -60,7 +61,8 @@ export const PlanCard: React.FC<PlanCardProps> = ({
             <div className="flex-shrink-0">
               {getPlanIcon("premium")}
             </div>
-            <span className="text-lg font-semibold">{plan.planName}</span>
+            <span className={`text-lg font-semibold ${plan.status !== 'active' ? 'line-through' : ''}`}>{plan.planName}</span>
+            <span className={`text-xs text-muted-foreground ml-2 bg-slate-100 px-2 py-0.5 rounded-xl`}>{plan.status}</span>
             {/* {!plan.isEnabled && (
               <Badge variant="secondary" className="text-xs">
                 Disabled
@@ -109,21 +111,33 @@ export const PlanCard: React.FC<PlanCardProps> = ({
           <div>Users: {plan.maxUsers === -1 ? 'Unlimited' : plan.maxUsers.toLocaleString()}</div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button
             className="flex-1"
-            variant={isPremium ? 'default' : 'outline'}
+            variant={plan.status === 'active' ? 'default' : 'outline'}
             onClick={() => onEdit(plan)}
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit
           </Button>
 
-          <Button variant="outline" size="default" onClick={() => onView(plan)}>
+          {/* <Button variant="outline" size="default" onClick={() => onView(plan)}>
             <Eye className="h-4 w-4" />
+          </Button> */}
+          <Button
+            variant={"default"}
+            onClick={() => onToggleStatus(plan.id)}>
+            <Power className="h-4 w-4 mr-2" />
+            {plan.status === 'active' ? 'Disable' : 'Enable'}
           </Button>
-
-          <DropdownMenu>
+          <Button
+            variant={"default"}
+            onClick={() => onDelete(plan._id)}
+            className="bg-red-500 hover:text-red-600"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="default">
                 <MoreVertical className="h-4 w-4 text-black" />
@@ -143,7 +157,7 @@ export const PlanCard: React.FC<PlanCardProps> = ({
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       </CardContent>
     </Card>
