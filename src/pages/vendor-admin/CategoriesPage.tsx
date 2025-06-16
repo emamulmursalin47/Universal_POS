@@ -111,7 +111,6 @@ export default function CategoriesPage() {
         }
         {
           !isloading &&
-
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-100">

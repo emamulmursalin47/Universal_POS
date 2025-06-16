@@ -1,20 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // types/product.ts
-export interface Product {
-  id: string;
-  name: string;
+export interface Category {
+  _id: string;
+  categoryName: string;
   description: string;
-  category: string;
-  buyPrice: number;
-  sellPrice: number;
-  stock: number;
-  minStock: number;
-  barCode: string;
-  image: string | null;
-  status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
+  status: string;
+  isDeleted: boolean;
+  createdAt: string; // or Date if you're converting it
+  updatedAt: string;
+  __v?: number;
 }
+
+export interface Product {
+  _id: string;
+  productName: string;
+  sku: string;
+  category: Category;
+  buyPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  unitType: string;
+  isActive: boolean;
+  barCodeNumber: string;
+  createdAt: string; // or Date
+  updatedAt: string;
+}
+
 
 export interface ProductFormData {
   id: string;
@@ -35,3 +46,13 @@ export interface ProductSearchFilters {
   categoryFilter: string;
   stockFilter: string;
 }
+
+export interface ProfitSummary  {
+  totalProducts: number;
+  totalBuyPrice: number;
+  totalSellingPrice: number;
+  totalProfit: number;
+  inStockCount: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+};
