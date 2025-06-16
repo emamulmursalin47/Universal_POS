@@ -9,15 +9,15 @@ import axios from 'axios';
 interface AddStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (staffData: StaffFormData) => void;
+  onSave: () => void;
 }
 
 const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }) => {
   // Extract role options from the StaffTypesNew type
   const roleOptions = [
-    { value: 'admin', label: 'Admin' },
+    // { value: 'admin', label: 'Admin' },
     { value: 'manager', label: 'Manager' },
-    { value: 'staff', label: 'Staff' }
+    // { value: 'staff', label: 'Staff' }
   ];
   const [formData, setFormData] = useState<StaffFormData>({
     email: '',
@@ -25,7 +25,8 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
     contactNumber: '',
     address: '',
     password: '',
-    role: ''
+    role: '',
+    status: 'active'
   });
 
   const [errors, setErrors] = useState<StaffFormErrors>({});
@@ -57,16 +58,16 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
 
     try {
       // Call the API endpoint
-      const response = await axios.post('/api/v1/shop-role/create-staff', formData, {
+      await axios.post('/api/v1/shop-role/create-staff', formData, {
         headers: {
           'Authorization': `${localStorage.getItem('accessToken')}`,
           'Content-Type': 'application/json',
         }
       });
 
-      const result = response.data;
+      // const result = response.data;
 
-      onSave(result);
+      onSave();
 
       // Reset form
       setFormData({
@@ -75,7 +76,8 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
         contactNumber: '',
         address: '',
         password: '',
-        role: ''
+        role: '',
+        status: 'active'
       });
       setErrors({});
       onClose();
@@ -93,7 +95,8 @@ const AddStaffModal: React.FC<AddStaffModalProps> = ({ isOpen, onClose, onSave }
       contactNumber: '',
       address: '',
       password: '',
-      role: ''
+      role: '',
+      status: 'active'
     });
     setErrors({});
     onClose();

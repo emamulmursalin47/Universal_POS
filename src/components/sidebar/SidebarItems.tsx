@@ -81,7 +81,7 @@ export function SidebarItem({ item, mobile = false, collapsed = false, isActiveR
             </NavLink>
           </TooltipTrigger>
           <TooltipContent side="right" sideOffset={10} className="flex items-center gap-2">
-            <span>{item.title}</span>
+            <span>{item.title}sss</span>
             {item.badge && (
               <Badge variant="outline" className="text-xs">
                 {item.badge}

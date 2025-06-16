@@ -1,16 +1,16 @@
 // types/staff.ts
-export interface Staff {
-  id: string;
-  name: string;
-  email: string;
-  role: 'cashier' | 'vendor_admin';
-  loginId: string;
-  password: string;
-  avatar?: string | null;
-  status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
-}
+// export interface Staff {
+//   id: string;
+//   name: string;
+//   email: string;
+//   role: 'cashier' | 'vendor_admin';
+//   loginId: string;
+//   password: string;
+//   avatar?: string | null;
+//   status: 'active' | 'inactive';
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
 
 export type StaffTypesNew = {
   _id: string;
@@ -36,6 +36,7 @@ export interface StaffFormData {
   address: string;
   password: string;
   role: string;
+  status: string,
 }
 
 export interface StaffFormErrors {
@@ -45,4 +46,5 @@ export interface StaffFormErrors {
   address?: string;
   password?: string;
   role?: string;
+  status?: string
 }

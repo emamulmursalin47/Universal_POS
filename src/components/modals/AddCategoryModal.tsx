@@ -2,11 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { useState } from "react";
 
 interface AddCategoryModalProps {
-  onSave: (category: { name: string; description: string }) => void;
+  onSave: (category: { categoryName: string; description: string }) => void;
   children: React.ReactNode;
 }
 
@@ -17,7 +17,7 @@ export function AddCategoryModal({ onSave, children }: AddCategoryModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ name, description });
+    onSave({ categoryName: name, description: description });
     setName("");
     setDescription("");
     setOpen(false);
@@ -31,6 +31,9 @@ export function AddCategoryModal({ onSave, children }: AddCategoryModalProps) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Category</DialogTitle>
+          <DialogDescription>
+            Add new Category and save when you're done.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

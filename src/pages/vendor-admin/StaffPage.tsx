@@ -2,13 +2,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, RefreshCw } from "lucide-react";
 // import { MOCK_STAFF_DATA } from '@/constants/staff';
 // import { Staff, StaffFormData } from '@/types/staff';
 // import StaffSearch from '@/components/staff/StaffSearch';
 // import StaffTable from '@/components/tables/StaffTable';
 import AddStaffModal from '@/components/modals/AddStaffModal';
-// import EditStaffModal from '@/components/modals/EditStaffModal';
+import EditStaffModal from '@/components/modals/EditStaffModal';
 import axios from 'axios';
 import { StaffTypesNew } from '@/types/staff';
 import StaffTableNew from '@/components/tables/StaffTableNew';
@@ -19,8 +19,9 @@ const StaffPage: React.FC = () => {
   // const [searchTerm, setSearchTerm] = useState<string>('');
   // const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-  // const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  // const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [isloading, setIsloading] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [selectedStaff, setSelectedStaff] = useState<StaffTypesNew | null>(null);
   // const [staffList, setStaffList] = useState<Staff[]>(() => {
   //   return MOCK_STAFF_DATA.filter(user =>
   //     user.role === 'cashier' || user.role === 'vendor_admin'
@@ -85,10 +86,11 @@ const StaffPage: React.FC = () => {
   //   alert(`Staff member "${newStaffMember.name}" added successfully!`);
   // }, [staffList]);
 
-  // const handleEditStaff = useCallback((staff: Staff) => {
-  //   setSelectedStaff(staff);
-  //   setIsEditModalOpen(true);
-  // }, []);
+  const handleEditStaff = useCallback((staff: StaffTypesNew) => {
+    // console.log(staff)
+    setSelectedStaff(staff);
+    setIsEditModalOpen(true);
+  }, []);
 
   // const handleUpdateStaff = useCallback((updatedStaff: Staff) => {
   //   setStaffList(prev =>
@@ -99,40 +101,8 @@ const StaffPage: React.FC = () => {
   //   alert(`Staff member "${updatedStaff.name}" updated successfully!`);
   // }, []);
 
-  // const handleToggleStatus = useCallback((staffId: string) => {
-  //   const staff = staffList.find(s => s.id === staffId);
-  //   if (!staff) return;
 
-  //   const action = staff.status === 'active' ? 'deactivate' : 'activate';
-  //   const confirmed = window.confirm(
-  //     `Are you sure you want to ${action} "${staff.name}"?`
-  //   );
 
-  //   if (confirmed) {
-  //     setStaffList(prev =>
-  //       prev.map(staff =>
-  //         staff.id === staffId
-  //           ? { ...staff, status: staff.status === 'active' ? 'inactive' : 'active', updatedAt: new Date() }
-  //           : staff
-  //       )
-  //     );
-  //     alert(`${staff.name} has been ${action}d successfully.`);
-  //   }
-  // }, [staffList]);
-
-  // const handleDeleteStaff = useCallback((staffId: string) => {
-  //   const staff = staffList.find(s => s.id === staffId);
-  //   if (!staff) return;
-
-  //   const confirmed = window.confirm(
-  //     `Are you sure you want to permanently delete "${staff.name}"? This action cannot be undone.`
-  //   );
-
-  //   if (confirmed) {
-  //     setStaffList(prev => prev.filter(s => s.id !== staffId));
-  //     alert(`${staff.name} has been deleted successfully.`);
-  //   }
-  // }, [staffList]);
 
   // const clearFilters = () => {
   //   setSearchTerm('');
@@ -146,6 +116,7 @@ const StaffPage: React.FC = () => {
 
   const [staffs, setStaffs] = useState<StaffTypesNew[]>([])
   const fetchStaff = useCallback(async () => {
+    setIsloading(true);
     try {
       const response = await axios('/api/v1/shop-role/staffs', {
         headers: {
@@ -154,17 +125,64 @@ const StaffPage: React.FC = () => {
       });
       const data = response.data.data.staffQuery;
       setStaffs(data);
-      console.log('Fetched staffs:', staffs); // Log fetched data directly
-    } catch (error) {
-      console.error('Error fetching staff:', error);
+      // console.log('Fetched staffs:', staffs);
+    } catch {
+      // console.error('Error fetching staff:', error);
     }
+    setIsloading(false);
   }, []); // No dependencies → stable reference
 
   useEffect(() => {
     fetchStaff(); // Runs only once
   }, [fetchStaff]); // Safe to include fetchStaff here
 
+  const handleDeleteStaff = useCallback(async (staffId: string) => {
+    setIsloading(true);
+    const staff = staffs.find(s => s._id === staffId);
+    if (!staff) return;
 
+    const confirmed = window.confirm(
+      `Are you sure you want to permanently delete "${staff.fullName}"? This action cannot be undone.`
+    );
+
+    if (confirmed) {
+      await axios.delete(`/api/v1/shop-role/delete-staff/${staffId}`, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+        },
+      })
+      alert(`${staff.fullName} has been deleted successfully.`);
+    }
+
+    await fetchStaff();
+    setIsloading(false);
+  }, [fetchStaff, staffs]);
+
+  const handleToggleStatus = useCallback(async (staffId: string) => {
+    setIsloading(true);
+    const staff = staffs.find(s => s.user === staffId);
+    if (!staff) return;
+
+    const action = staff.status === 'active' ? 'inactive' : 'active';
+    const confirmed = window.confirm(
+      `Are you sure you want to ${action} ${staff.fullName}?`
+    );
+
+    if (confirmed) {
+      await axios.patch(`/api/v1/shop-role/update-staff/${staffId}`, {
+        status: action
+      }, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      alert(`${staff.fullName} has been ${action}d successfully.`);
+
+    }
+    await fetchStaff();
+    setIsloading(false);
+  }, [fetchStaff, staffs]);
 
 
   return (
@@ -198,7 +216,7 @@ const StaffPage: React.FC = () => {
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <CardTitle className="text-lg sm:text-xl lg:text-2xl">
-                All Staff Members ({staffs.length})
+                All Staff Members
               </CardTitle>
 
               {/* Quick Stats Pills */}
@@ -240,12 +258,21 @@ const StaffPage: React.FC = () => {
               onClearFilters={clearFilters}
               hasFilters={hasFilters}
             />  */}
-            <StaffTableNew
-              staff={staffs}
-            />
-            {/* <StaffTable
-              staff={staffs}
-            /> */}
+            {isloading &&
+              <div className="flex items-center justify-center p-4">
+                <RefreshCw className="h-28 w-28 animate-spin text-primary" />
+              </div>
+            }
+            {
+              !isloading &&
+              <StaffTableNew
+                staff={staffs}
+                // fetchStaff={fetchStaff}
+                onToggleStatus={handleToggleStatus}
+                onDelete={handleDeleteStaff}
+                onEdit={handleEditStaff}
+              />
+            }
           </CardContent>
         </Card>
       </div>
@@ -253,16 +280,17 @@ const StaffPage: React.FC = () => {
       {/* Modals */}
       <AddStaffModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => { setIsAddModalOpen(false); fetchStaff(); }}
         onSave={fetchStaff}
       />
 
-      {/* <EditStaffModal
+      <EditStaffModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => { setIsEditModalOpen(false); setSelectedStaff(null); fetchStaff(); }}
+        // onUpdate={handleUpdateStaff}
         staff={selectedStaff}
-        onUpdate={handleUpdateStaff}
-      /> */}
+      // onUpdate={handleUpdateStaff}
+      />
     </div>
   );
 };
