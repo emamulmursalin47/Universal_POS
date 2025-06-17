@@ -1,14 +1,13 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Package, TrendingUp, AlertTriangle, DollarSign } from 'lucide-react';
+import { Plus, Package, TrendingUp, AlertTriangle, DollarSign, RefreshCw } from 'lucide-react';
 import ProductTable from '@/components/tables/ProductTable';
-// import AddProductModal from '@/components/modals/AddProductModal';
-// import EditProductModal from '@/components/modals/EditProductModal';
+import AddProductModal from '@/components/modals/AddProductModal';
+import EditProductModal from '@/components/modals/EditProductModal';
 import { Product, ProfitSummary } from '@/types/products';
 // import { Product, ProductFormData } from '@/types/products';
 import axios from 'axios';
-
 
 const calculateProfit = (products: Product[], minStockLevel: number): ProfitSummary => {
   let totalBuyPrice = 0;
@@ -45,14 +44,15 @@ const calculateProfit = (products: Product[], minStockLevel: number): ProfitSumm
 
 
 const ProductPage: React.FC = () => {
-  const minStockLevel = 30;
+  const minStockLevel = 10;
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   // const [searchTerm, setSearchTerm] = useState<string>('');
   // const [statusFilter, setStatusFilter] = useState<string>('all');
   // const [categoryFilter, setCategoryFilter] = useState<string>('all');
   // const [stockFilter, setStockFilter] = useState<string>('all');
-  // const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-  // const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
-  // const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   // const [productList, setProductList] = useState<Product[]>(MOCK_PRODUCT_DATA);
   const [products, setProducts] = useState<Product[]>([]);
   const [profitSummary, setProfitSummary] = useState<ProfitSummary>({
@@ -66,18 +66,20 @@ const ProductPage: React.FC = () => {
   });
 
   const fetchProducts = useCallback(async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get('/api/v1/product/all-product', {
         headers: {
           'Authorization': `${localStorage.getItem('accessToken')}`
         },
       });
-      console.log(response.data.data);
+      // console.log(response.data.data);
       setProducts(response.data.data);
       setProfitSummary(calculateProfit(response.data.data, minStockLevel));
-    } catch (error) {
-      console.error('Error fetching products:', error);
+    } catch {
+      // console.error('Error fetching products:', error);
     }
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -173,9 +175,12 @@ const ProductPage: React.FC = () => {
   // }, [productList]);
 
   const handleEditProduct = useCallback((product: Product) => {
-    // setSelectedProduct(product);
-    // setIsEditModalOpen(true);
-    alert(`Product "${product}" edited successfully!`);
+    // console.log('handleEditProduct called');
+    const confirmEdit = window.confirm(`Are you sure you want to edit this ${product.productName}?`);
+    if (!confirmEdit) return;
+    setSelectedProduct(product);
+    setIsEditModalOpen(true);
+    // console.log('product:', product);
   }, []);
 
   // const handleUpdateProduct = useCallback((updatedProduct: Product) => {
@@ -187,56 +192,42 @@ const ProductPage: React.FC = () => {
   //   alert(`Product "${updatedProduct.name}" updated successfully!`);
   // }, []);
 
-  const handleToggleStatus = useCallback((productId: string) => {
-    console.log('productId', productId);
-  }, []);
-  //   const product = productList.find(p => p.id === productId);
-  //   if (!product) return;
+  const handleToggleStatus = useCallback(async (productId: string, isActive: boolean) => {
+    setIsLoading(true);
+    const confirmToggle = window.confirm(`Are you sure you want to ${isActive ? 'deactivate' : 'activate'} this product?`);
+    if (confirmToggle) {
+      await axios.patch(`/api/v1/product/update-product/${productId}`, {
+        "isActive": !isActive
+      }, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`
+        },
+      })
+    }
+    fetchProducts();
+    setIsLoading(false);
+  }, [fetchProducts]);
 
-  //   const action = product.status === 'active' ? 'deactivate' : 'activate';
-  //   const confirmed = window.confirm(
-  //     `Are you sure you want to ${action} "${product.name}"?`
-  //   );
 
-  //   if (confirmed) {
-  //     setProductList(prev =>
-  //       prev.map(product =>
-  //         product.id === productId
-  //           ? { ...product, status: product.status === 'active' ? 'inactive' : 'active', updatedAt: new Date() }
-  //           : product
-  //       )
-  //     );
-  //     alert(`${product.name} has been ${action}d successfully.`);
+  // const handleDeleteProduct = useCallback(async (productId: string) => {
+  //   setIsLoading(true);
+  //   console.log('productId', productId);
+  //   const confirmDelete = window.confirm('Are you sure you want to delete this product?');
+  //   if (confirmDelete) {
+  //     const response = await axios.delete(`/api/v1/product/delete-product/${productId}`, {
+  //       headers: {
+  //         'Authorization': `${localStorage.getItem('accessToken')}`
+  //       },
+  //     })
+  //     console.log(response);
   //   }
-  // }, [productList]);
-
-  const handleDeleteProduct = useCallback((productId: string) => {
-    console.log('productId', productId);
-  }, []);
-  //   const product = productList.find(p => p.id === productId);
-  //   if (!product) return;
-
-  //   const confirmed = window.confirm(
-  //     `Are you sure you want to permanently delete "${product.name}"? This action cannot be undone.`
-  //   );
-
-  //   if (confirmed) {
-  //     setProductList(prev => prev.filter(p => p.id !== productId));
-  //     alert(`${product.name} has been deleted successfully.`);
-  //   }
-  // }, [productList]);
-
-  // const clearFilters = () => {
-  //   // setSearchTerm('');
-  //   // setStatusFilter('all');
-  //   // setCategoryFilter('all');
-  //   // setStockFilter('all');
-  //   console.log('clearFilters called');
-  // };
+  //   fetchProducts();
+  //   setIsLoading(false);
+  // }, [fetchProducts]);
 
   const openAddModal = () => {
-    // setIsAddModalOpen(true);
-    console.log('openAddModal called');
+    setIsAddModalOpen(true);
+    // console.log('openAddModal called');
   };
 
   return (
@@ -253,20 +244,30 @@ const ProductPage: React.FC = () => {
               Comprehensive inventory management system for all your products
             </p>
           </div>
-
-          <Button
-            // onClick={openAddModal} 
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="sm:hidden">Add Product</span>
-            <span className="hidden sm:inline">Add New Product</span>
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={openAddModal}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="sm:hidden">Add Product</span>
+              <span className="hidden sm:inline">Add New Product</span>
+            </Button>
+            <Button
+              onClick={fetchProducts}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {/* <span className="sm:hidden">Refresh Product</span> */}
+              <span className="hidden sm:inline">Refresh Product</span>
+            </Button>
+          </div>
         </div>
 
         {/* Statistics Cards - Only show if there are products */}
-        {products.length > 0 && (
+        {profitSummary.totalProducts > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4 sm:p-6">
@@ -323,43 +324,50 @@ const ProductPage: React.FC = () => {
             </Card>
           </div>
         )}
+        {isLoading &&
+          <div className="flex items-center justify-center p-4">
+            <RefreshCw className="h-28 w-28 animate-spin text-primary" />
+          </div>
+        }
 
         {/* Main Content Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle className="text-lg sm:text-xl lg:text-2xl">
-                {/* All Products ({filteredProducts.length}) */}
-                All Products
-              </CardTitle>
+        {
+          !isLoading &&
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <CardTitle className="text-lg sm:text-xl lg:text-2xl">
+                  {/* All Products ({filteredProducts.length}) */}
+                  All Products
+                </CardTitle>
 
-              {/* Quick Stats Pills */}
-              {products.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                    {profitSummary.inStockCount} In Stock
-                    {/* {stats.inStockProducts} In Stock */}
+                {/* Quick Stats Pills */}
+                {products.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                      {profitSummary.inStockCount} In Stock
+                      {/* {stats.inStockProducts} In Stock */}
+                    </div>
+                    <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                      {profitSummary.lowStockCount} Low Stock
+                      {/* {stats.lowStockProducts} Low Stock */}
+                    </div>
+                    <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
+                      {profitSummary.outOfStockCount} Out of Stock
+                      {/* {stats.outOfStockProducts} Out of Stock */}
+                    </div>
+                    <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      {profitSummary.totalProducts} Total
+                      {/* {stats.totalProducts} Total */}
+                    </div>
                   </div>
-                  <div className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                    {profitSummary.lowStockCount} Low Stock
-                    {/* {stats.lowStockProducts} Low Stock */}
-                  </div>
-                  <div className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-medium">
-                    {profitSummary.outOfStockCount} Out of Stock
-                    {/* {stats.outOfStockProducts} Out of Stock */}
-                  </div>
-                  <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                    {profitSummary.totalProducts} Total
-                    {/* {stats.totalProducts} Total */}
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardHeader>
+                )}
+              </div>
+            </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Search and Filter Section - Only show if there are products */}
-            {/* {productList.length > 0 && (
+            <CardContent className="space-y-6">
+              {/* Search and Filter Section - Only show if there are products */}
+              {/* {productList.length > 0 && (
               <ProductSearch
                 searchTerm={searchTerm}
                 statusFilter={statusFilter}
@@ -373,34 +381,36 @@ const ProductPage: React.FC = () => {
               />
             )} */}
 
-            {/* Responsive Product Table/Cards */}
-            <ProductTable
-              products={products}
-              onEdit={handleEditProduct}
-              onToggleStatus={handleToggleStatus}
-              onDelete={handleDeleteProduct}
-              onAddNew={openAddModal}
-              minStockLevel={minStockLevel}
-            />
-          </CardContent>
-        </Card>
+              {/* Responsive Product Table/Cards */}
+              <ProductTable
+                products={products}
+                onEdit={handleEditProduct}
+                onToggleStatus={handleToggleStatus}
+                // onDelete={handleDeleteProduct}
+                onAddNew={openAddModal}
+                minStockLevel={minStockLevel}
+              />
+            </CardContent>
+          </Card>
+        }
+
       </div>
 
       {/* Modals */}
 
-      {/* <AddProductModal
+      <AddProductModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleAddProduct}
-      /> */}
+        onClose={() => { setIsAddModalOpen(false); fetchProducts(); }}
+        onSave={fetchProducts}
+      />
 
-      {/* <EditProductModal
+      <EditProductModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         product={selectedProduct}
-        onUpdate={handleUpdateProduct}
-      /> */}
-    </div>
+        onUpdate={fetchProducts}
+      />
+    </div >
   );
 };
 

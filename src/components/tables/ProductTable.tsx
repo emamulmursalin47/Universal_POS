@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import {
   Edit,
-  Trash2,
+  // Trash2,
   Eye,
   EyeOff,
   Plus,
@@ -26,8 +26,8 @@ import { Product } from '@/types/products';
 interface ProductTableProps {
   products: Product[];
   onEdit: (product: Product) => void;
-  onToggleStatus: (productId: string) => void;
-  onDelete: (productId: string) => void;
+  onToggleStatus: (productId: string, isActive: boolean) => void;
+  // onDelete: (productId: string) => void;
   onAddNew: () => void;
   minStockLevel: number;
 }
@@ -36,7 +36,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
   products,
   onEdit,
   onToggleStatus,
-  onDelete,
+  // onDelete,
   onAddNew,
   minStockLevel
 }) => {
@@ -49,7 +49,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
 
   const getStockStatus = (product: Product) => {
     if (product.quantity === 0) return 'out';
-    if (product.quantity <= minStockLevel) return 'low';
+    if (product.quantity < minStockLevel) return 'low';
     return 'good';
   };
 
@@ -149,7 +149,7 @@ const ProductTable: React.FC<ProductTableProps> = ({
                       <div className="text-sm">
                         <span className="font-medium">{product.quantity}</span> units
                       </div>
-                      {product.quantity <= minStockLevel && product.quantity > 0 && (
+                      {product.quantity < minStockLevel && product.quantity > 0 && (
                         <div className="flex items-center text-yellow-600 text-xs">
                           <AlertTriangle className="h-3 w-3 mr-1" />
                           Below min ({minStockLevel})
@@ -181,14 +181,16 @@ const ProductTable: React.FC<ProductTableProps> = ({
                         size="sm"
                         onClick={() => onEdit(product)}
                         className="h-8 w-8 p-0"
+                        title="Edit Product"
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onToggleStatus(product._id)}
+                        onClick={() => onToggleStatus(product._id, product.isActive)}
                         className="h-8 w-8 p-0"
+                        title={product.isActive ? 'Deactivate' : 'Activate'}
                       >
                         {product.isActive ? (
                           <EyeOff className="h-4 w-4" />
@@ -196,14 +198,15 @@ const ProductTable: React.FC<ProductTableProps> = ({
                           <Eye className="h-4 w-4" />
                         )}
                       </Button>
-                      <Button
+                      {/* <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => onDelete(product._id)}
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        title="Delete Product"
                       >
                         <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </Button> */}
                     </div>
                   </TableCell>
                 </TableRow>

@@ -28,16 +28,31 @@ export interface Product {
 
 
 export interface ProductFormData {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  buyPrice: any;
-  sellPrice: any;
-  stock: any;
-  minStock: any;
-  barCode: string;
-  image?: string | null;
+  _id?: string;
+  productName: string;
+  category: string | object | Category | any; // This is likely a category ID (MongoDB ObjectId as string)
+  buyPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  unitType: string; // e.g., 'piece', 'kg', 'box'
+}
+
+export interface EditProductFormData {
+  productName: string;
+  category: string; // This is likely a category ID (MongoDB ObjectId as string)
+  buyPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  unitType: string; // e.g., 'piece', 'kg', 'box'
+}
+
+export interface ProductFormDataError {
+  productName: string;
+  category: string; // This is likely a category ID (MongoDB ObjectId as string)
+  buyPrice: number | string;
+  sellingPrice: number | string;
+  quantity: number | string;
+  unitType: string; // e.g., 'piece', 'kg', 'box'
 }
 
 export interface ProductSearchFilters {
@@ -47,7 +62,7 @@ export interface ProductSearchFilters {
   stockFilter: string;
 }
 
-export interface ProfitSummary  {
+export interface ProfitSummary {
   totalProducts: number;
   totalBuyPrice: number;
   totalSellingPrice: number;
