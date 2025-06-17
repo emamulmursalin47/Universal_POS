@@ -406,7 +406,7 @@ const ProductPage: React.FC = () => {
 
       <EditProductModal
         isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
+        onClose={() => { setIsEditModalOpen(false); fetchProducts(); }}
         product={selectedProduct}
         onUpdate={fetchProducts}
       />
