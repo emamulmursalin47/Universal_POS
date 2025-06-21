@@ -42,6 +42,7 @@ export interface Product {
   barCodeNumber: string;
   createdAt: string; // or Date
   updatedAt: string;
+  buyquantity?: number;
 }
 
 export interface Category {
@@ -80,14 +81,15 @@ export interface SaleItem {
 }
 
 export interface Customer {
-  id: string;
+  _id?: string;
   name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  shopId: string;
+  email: string;
+  contact: string;
+  address: string;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
 export interface SubscriptionPlan {
   id: string;
   name?: string;
