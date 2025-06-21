@@ -199,16 +199,26 @@ const StaffPage: React.FC = () => {
               Comprehensive management system for staff members and their access levels
             </p>
           </div>
-
-          <Button
-            onClick={openAddModal}
-            size="lg"
-            className="w-full sm:w-auto"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span className="sm:hidden">Add Staff</span>
-            <span className="hidden sm:inline">Add New Staff Member</span>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={openAddModal}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              <span className="sm:hidden">Add Staff</span>
+              <span className="hidden sm:inline">Add New Staff Member</span>
+            </Button>
+            <Button
+              onClick={fetchStaff}
+              size="lg"
+              className="w-full sm:w-auto"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              {/* <span className="sm:hidden">Refresh staff</span> */}
+              <span className="hidden sm:inline">Refresh Staff</span>
+            </Button>
+          </div>
         </div>
 
         {/* Main Content Card */}

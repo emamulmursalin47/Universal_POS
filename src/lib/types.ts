@@ -29,19 +29,19 @@ export interface Shop {
 }
 
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  sku: string;
-  barcode?: string;
-  price: number;
-  cost: number;
-  stock: number;
-  categoryId: string;
-  shopId: string;
-  image?: string;
-  createdAt: string;
-  updatedAt: string;
+  _id: string;
+    productName: string;
+    sku: string;
+    category: Category;
+    buyPrice: number;
+    sellingPrice: number;
+    quantity: number;
+    unitType: string;
+    isActive: boolean;
+    brandName?: string;
+    barCodeNumber: string;
+    createdAt: string; // or Date
+    updatedAt: string;
 }
 
 export interface Category {

@@ -4,7 +4,8 @@ import { CashierLayout } from '@/components/layout/CashierLayout';
 import CashierPOS from '@/pages/cashier/CashierPOS';
 import SalesHistoryPage from '@/pages/cashier/SalesHistoryPage';
 import ReportsPage from '@/pages/cashier/ReportsPage';
-import ProfilePage from '@/pages/cashier/ProfilePage';
+import InvoiceReceipt from '@/pages/cashier/InvoiceReceipt';
+// import ProfilePage from '@/pages/cashier/ProfilePage';
 
 
 export const cashierRoutes = [
@@ -25,10 +26,14 @@ export const cashierRoutes = [
         element: <ReportsPage />
       },
       {
-        path: "profile",
-        element: <ProfilePage />
+        path: "recipt/:invoiceId", // ✅ Add dynamic param here
+        element: <InvoiceReceipt />
       },
-       
+      // {
+      //   path: "profile",
+      //   element: <ProfilePage />
+      // },
+
     ]
   }
 ];

@@ -34,9 +34,9 @@ export interface StaffFormData {
   fullName: string;
   contactNumber: string;
   address: string;
-  password: string;
-  role: string;
-  status: string,
+  password?: string;
+  role?: string;
+  status?: string,
 }
 
 export interface StaffFormErrors {

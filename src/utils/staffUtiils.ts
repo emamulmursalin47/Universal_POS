@@ -18,7 +18,7 @@ export const validateStaffForm = (formData: StaffFormData): StaffFormErrors => {
 
   if (!formData.contactNumber.trim()) {
     errors.contactNumber = 'Contact number is required';
-  } else if (!/^[\d\s\-\+\(\)]+$/.test(formData.contactNumber)) {
+  } else if (!/^[\d\s\-+()]+$/.test(formData.contactNumber)) {
     errors.contactNumber = 'Please enter a valid contact number';
   } else if (formData.contactNumber.replace(/\D/g, '').length < 10) {
     errors.contactNumber = 'Contact number must be at least 10 digits';
@@ -34,13 +34,13 @@ export const validateStaffForm = (formData: StaffFormData): StaffFormErrors => {
     errors.role = 'Role selection is required';
   }
 
-  if (!formData.password.trim()) {
-    errors.password = 'Password is required';
-  } else if (formData.password.length < 6) {
-    errors.password = 'Password must be at least 6 characters';
-  } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-    errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
-  }
+  // if (!formData.password.trim()) {
+  //   errors.password = 'Password is required';
+  // } else if (formData.password.length < 6) {
+  //   errors.password = 'Password must be at least 6 characters';
+  // } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+  //   errors.password = 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+  // }
 
   return errors;
 };

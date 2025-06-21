@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { POSCart } from '@/components/cashier/POSCart';
+import { useCallback, useState, useEffect } from 'react';
+// import { POSCart } from '@/components/cashier/POSCart';
 import { POSProductGrid } from '@/components/cashier/POSProductGrid';
 // import { useAuth } from '@/hooks/useAuth';
 // import { MOCK_SHOPS } from '@/lib/constants';
@@ -24,6 +24,8 @@ import {
   Check
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Product } from '@/lib/types';
+import axios from 'axios';
 
 interface Customer {
   id: string;
@@ -265,6 +267,26 @@ function CustomerSelector({ selectedCustomer, onCustomerSelect }: CustomerSelect
 export default function CashierPOS() {
   // const { user } = useAuth();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/v1/product/all-product', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      console.log(response.data.data);
+      setProducts(response.data.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   // In a real app, we would fetch the shop data from API
   // const shopData = user?.shopId 
@@ -296,7 +318,7 @@ export default function CashierPOS() {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0">
         <div className="lg:col-span-2 min-h-0">
-          <POSProductGrid />
+          <POSProductGrid products={products} />
         </div>
         {/* <div className="min-h-0">
           <POSCart  />

@@ -119,7 +119,8 @@ const ProductTable: React.FC<ProductTableProps> = ({
                   </TableCell>
                   <TableCell>
                     <div className="space-y-1">
-                      <div className="font-medium">{product.productName}</div>
+                      <div className="font-medium"><span className="bg-gray-400 text-white text-xs font-bold px-2 py-1 rounded">{product.brandName}</span> {product.productName}</div>
+                      <div></div>
                       {/* <div className="text-sm text-gray-500 line-clamp-2">
                         {product.description}
                       </div> */}

@@ -21,6 +21,7 @@ export interface Product {
   quantity: number;
   unitType: string;
   isActive: boolean;
+  brandName?: string;
   barCodeNumber: string;
   createdAt: string; // or Date
   updatedAt: string;
@@ -35,6 +36,7 @@ export interface ProductFormData {
   sellingPrice: number;
   quantity: number;
   unitType: string; // e.g., 'piece', 'kg', 'box'
+  brandName?: string;
 }
 
 export interface EditProductFormData {
@@ -44,6 +46,7 @@ export interface EditProductFormData {
   sellingPrice: number;
   quantity: number;
   unitType: string; // e.g., 'piece', 'kg', 'box'
+  brandName?: string;
 }
 
 export interface ProductFormDataError {
@@ -53,6 +56,7 @@ export interface ProductFormDataError {
   sellingPrice: number | string;
   quantity: number | string;
   unitType: string; // e.g., 'piece', 'kg', 'box'
+  brandName: string;
 }
 
 export interface ProductSearchFilters {

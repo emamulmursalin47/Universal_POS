@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StaffFormData, StaffFormErrors, StaffTypesNew } from '@/types/staff';
 import { validateStaffForm } from '@/utils/staffUtiils';
-// import { STAFF_ROLES } from '@/constants/staff';
+import axios from 'axios';
 
 interface EditStaffModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
     role: '',
     contactNumber: '',
     address: '',
-    password: '',
+    // password: '',
     status: '',
   });
 
@@ -39,7 +39,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
         role: staff.role,
         contactNumber: staff.contactNumber || '',
         address: staff.address || '',
-        password: '', // Password is not typically pre-filled
+        // password: '', // Password is not typically pre-filled
         status: staff.status || 'active',
       });
     }
@@ -57,7 +57,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
     //     [field]: undefined
     //   }));
     // }
-  }, [errors]);
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     const validationErrors = validateStaffForm(formData);
@@ -71,16 +71,21 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // const updatedStaff: StaffTypesNew = {
-      //   ...staff!,
-      //   fullName: formData.fullName,
-      //   email: formData.email,
-      //   contactNumber: formData.contactNumber,
-      //   address: formData.address,
-      // };
-
-      // onUpdate(updatedStaff);
+      if (!staff) return;
+      const updatedStaff: StaffFormData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        contactNumber: formData.contactNumber,
+        address: formData.address,
+      };
+      // console.log('id', staff?.user);
+      const response = await axios.patch(`/api/v1/shop-role/update-staff/${staff.user}`, updatedStaff, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      console.log(response);
       onClose();
     } catch (error) {
       console.error('Error updating staff member:', error);
@@ -179,7 +184,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
             </div> */}
 
             {/* Password */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700">Password</label>
               <Input
                 type="password"
@@ -189,7 +194,7 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
                 className={errors.password ? 'border-red-500' : ''}
               />
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">

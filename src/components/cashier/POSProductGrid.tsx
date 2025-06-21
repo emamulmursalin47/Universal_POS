@@ -1,57 +1,63 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Search, Filter } from 'lucide-react';
 // import { useDispatch } from 'react-redux';
 // import { addItem } from '@/redux/slices/cartSlice';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/constants';
+// import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/constants';
 import type { Product } from '@/lib/types';
 
-export function POSProductGrid() {
+interface POSProductGridProps {
+  products: Product[];
+}
+
+export function POSProductGrid({ products }: POSProductGridProps) {
   // const dispatch = useDispatch();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25; // Show more items per page
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const itemsPerPage = 25; // Show more items per page
+
 
   const handleAddToCart = (product: Product) => {
+    console.log('Add to cart:', product);
     // dispatch(addItem({ product, quantity: 1 }));
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.barcode?.includes(searchTerm) ||
-      product.sku.includes(searchTerm);
-    const matchesCategory = activeTab === 'all' || product.categoryId === activeTab;
-    return matchesSearch && matchesCategory;
-  });
+  // const filteredProducts = MOCK_PRODUCTS.filter((product) => {
+  //   const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     product.barcode?.includes(searchTerm) ||
+  //     product.sku.includes(searchTerm);
+  //   const matchesCategory = activeTab === 'all' || product.categoryId === activeTab;
+  //   return matchesSearch && matchesCategory;
+  // });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+  // const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  // const startIndex = (currentPage - 1) * itemsPerPage;
+  // const endIndex = startIndex + itemsPerPage;
+  // const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   // Reset to first page when search or category changes
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
+    // setCurrentPage(1);
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setCurrentPage(1);
+    // setCurrentPage(1);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
+  // const handlePageChange = (page: number) => {
+  //   setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  // };
 
   const getStockStatus = (stock: number) => {
-    if (stock === 0) return { text: 'Out', color: 'text-red-600 bg-red-50' };
-    if (stock <= 5) return { text: 'Low', color: 'text-amber-600 bg-amber-50' };
-    return { text: 'OK', color: 'text-green-600 bg-green-50' };
+    if (stock === 0) return { text: 'Out', color: 'text-red-600 bg-red-50 px-3 py-1 rounded-xl' };
+    if (stock <= 5) return { text: 'Low', color: 'text-amber-600 bg-amber-50 px-3 py-1 rounded-xl' };
+    return { text: 'OK', color: 'text-green-600 bg-green-50 px-3 py-1 rounded-xl' };
   };
 
   return (
@@ -74,7 +80,7 @@ export function POSProductGrid() {
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col min-h-0">
         {/* Compact Category Tabs */}
-        <div className="px-3 pt-2">
+        {/* <div className="px-3 pt-2">
           <TabsList className="grid grid-flow-col auto-cols-max gap-1 h-8">
             <TabsTrigger value="all" className="text-xs px-2">All</TabsTrigger>
             {MOCK_CATEGORIES.map((category) => (
@@ -83,14 +89,14 @@ export function POSProductGrid() {
               </TabsTrigger>
             ))}
           </TabsList>
-        </div>
+        </div> */}
 
         <TabsContent value={activeTab} className="flex-1 mt-2 flex flex-col min-h-0">
           {/* Compact Results Summary */}
-          <div className="flex justify-between items-center px-3 pb-2 text-xs text-muted-foreground">
+          {/* <div className="flex justify-between items-center px-3 pb-2 text-xs text-muted-foreground">
             <span>{startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length}</span>
             <span>Page {currentPage}/{totalPages}</span>
-          </div>
+          </div> */}
 
           {/* Compact Product Table */}
           <div className="flex-1 mx-3 border rounded overflow-hidden min-h-0">
@@ -107,25 +113,25 @@ export function POSProductGrid() {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentProducts.length > 0 ? (
-                    currentProducts.map((product, index) => {
-                      const stockStatus = getStockStatus(product.stock);
+                  {products.length > 0 ? (
+                    products.map((product, index) => {
+                      const stockStatus = getStockStatus(product.quantity);
                       return (
                         <tr
-                          key={product.id}
+                          key={index}
                           className={`border-b hover:bg-accent cursor-pointer transition-colors text-sm ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
                             }`}
                           onClick={() => handleAddToCart(product)}
                         >
                           <td className="p-2">
-                            <div className="font-medium leading-tight">{product.name}</div>
-                            {product.barcode && (
-                              <div className="text-xs text-muted-foreground font-mono">{product.barcode}</div>
+                            <div className="font-medium leading-tight">{product.productName}</div>
+                            {product.barCodeNumber && (
+                              <div className="text-xs text-muted-foreground font-mono">{product.barCodeNumber}</div>
                             )}
                           </td>
                           <td className="p-2 font-mono text-xs">{product.sku}</td>
-                          <td className="p-2 text-right font-bold">${product.price.toFixed(2)}</td>
-                          <td className="p-2 text-center font-medium">{product.stock}</td>
+                          <td className="p-2 text-right font-bold">${product.sellingPrice.toFixed(2)}</td>
+                          <td className="p-2 text-center font-medium">{product.quantity}</td>
                           <td className="p-2 text-center">
                             <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${stockStatus.color}`}>
                               {stockStatus.text}
@@ -138,7 +144,7 @@ export function POSProductGrid() {
                                 e.stopPropagation();
                                 handleAddToCart(product);
                               }}
-                              disabled={product.stock === 0}
+                              disabled={product.quantity === 0}
                               className="h-6 px-2 text-xs"
                             >
                               +
@@ -160,7 +166,7 @@ export function POSProductGrid() {
           </div>
 
           {/* Compact Pagination */}
-          {totalPages > 1 && (
+          {/* {totalPages > 1 && (
             <div className="flex items-center justify-between p-3 border-t mt-auto">
               <Button
                 variant="outline"
@@ -211,7 +217,7 @@ export function POSProductGrid() {
                 <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-          )}
+          )} */}
         </TabsContent>
       </Tabs>
     </div>

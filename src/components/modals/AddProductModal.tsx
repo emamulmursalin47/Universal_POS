@@ -22,6 +22,7 @@ import { Package, DollarSign } from 'lucide-react';
 import { ProductFormData, Category, ProductFormDataError } from '@/types/products';
 import axios from 'axios';
 
+
 interface AddProductModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -43,9 +44,21 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     sellingPrice: 0,
     quantity: 0,
     unitType: 'pcs',
+    brandName: '',
   });
 
   const [errors, setErrors] = useState<Partial<ProductFormDataError>>({});
+  const [brands, setBrands] = useState<{ _id: string; brandName: string }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filteredBrands = brands.filter(
+    brand => brand.brandName.toLowerCase().includes((formData.brandName ?? '').toLowerCase()) && (formData.brandName ?? '').trim() !== ""
+  );
+
+  const handleSelect = (brand: string) => {
+    setFormData(prev => ({ ...prev, brandName: brand }));
+    setShowSuggestions(false);
+  };
 
   const resetForm = () => {
     setFormData({
@@ -55,6 +68,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       sellingPrice: 0,
       quantity: 0,
       unitType: 'pcs',
+      brandName: '',
     });
     setErrors({});
   };
@@ -82,6 +96,13 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       newErrors.quantity = 'Stock cannot be negative';
     }
 
+    if (!formData.unitType) {
+      newErrors.unitType = 'Unit type is required';
+    }
+    if (!formData.brandName) {
+      newErrors.brandName = 'Brand name is required'
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,7 +112,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
 
     if (validateForm()) {
       // console.log('Form is valid, submitting:', formData);
-       await axios.post('/api/v1/product/create-product', formData, {
+      await axios.post('/api/v1/product/create-product', formData, {
         headers: {
           'Authorization': `${localStorage.getItem('accessToken')}`
         },
@@ -120,11 +141,30 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       });
       setCategories(response.data.data);
       // console.log('Categories:', response.data.data);
-    } catch  {
+    } catch {
       // console.error('Error fetching categories:', error);
       return [];
     }
   }, []);
+
+  const fetchBrands = useCallback(async () => {
+    try {
+      const response = await axios.get("/api/v1/brand/all-brand", {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`
+        },
+      });
+      if (response.data.success) {
+        setBrands(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch brands", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBrands();
+  }, [fetchBrands]);
 
   useEffect(() => {
     fetchCategories();
@@ -161,24 +201,55 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </div>
 
             {/* Category */}
-            <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-              >
-                <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category, index) => (
-                    <SelectItem key={index} value={category._id}>
-                      {category.categoryName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category, index) => (
+                      <SelectItem key={index} value={category._id}>
+                        {category.categoryName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brandName">Brand Name *</Label>
+                <Input
+                  id="brandName"
+                  value={formData.brandName}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, brandName: e.target.value }));
+                    setShowSuggestions(true);
+                  }}
+                  placeholder="Enter Brand name"
+                  className={errors.productName ? 'border-red-500' : ''}
+                />
+                {errors.brandName && <p className="text-sm text-red-500">{errors.brandName}</p>}
+                {showSuggestions && filteredBrands.length > 0 && (
+                  <div className="absolute z-10 bg-white border mt-1 rounded w-full shadow">
+                    {filteredBrands.map((brand, idx) => (
+                      <div
+                        key={idx}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                        onClick={() => handleSelect(brand.brandName)}
+                      >
+                        {brand.brandName}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -279,7 +350,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
                 {errors.quantity && <p className="text-sm text-red-500">{errors.quantity}</p>}
               </div>
 
-
+              {/* Unit Type */}
               <div className="space-y-2">
                 <Label htmlFor="category">Unit *</Label>
                 <Select
