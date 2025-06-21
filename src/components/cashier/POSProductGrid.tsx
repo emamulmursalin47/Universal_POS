@@ -1,20 +1,21 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Filter } from 'lucide-react';
 // import { useDispatch } from 'react-redux';
 // import { addItem } from '@/redux/slices/cartSlice';
 // import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/constants';
-import type { Product } from '@/lib/types';
+import type { Product, Category } from '@/lib/types';
 
 interface POSProductGridProps {
   products: Product[];
+  categories: Category[];
 }
 
-export function POSProductGrid({ products }: POSProductGridProps) {
+export function POSProductGrid({ products, categories }: POSProductGridProps) {
   // const dispatch = useDispatch();
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
   const [activeTab, setActiveTab] = useState('all');
   // const [currentPage, setCurrentPage] = useState(1);
   // const itemsPerPage = 25; // Show more items per page
@@ -25,13 +26,17 @@ export function POSProductGrid({ products }: POSProductGridProps) {
     // dispatch(addItem({ product, quantity: 1 }));
   };
 
-  // const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-  //   const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     product.barcode?.includes(searchTerm) ||
-  //     product.sku.includes(searchTerm);
-  //   const matchesCategory = activeTab === 'all' || product.categoryId === activeTab;
-  //   return matchesSearch && matchesCategory;
-  // });
+  const filteredProducts = products.filter((product) => {
+    console.log('product', product);
+    console.log('searchTerm', searchTerm);
+    const matchesSearch = product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      || String(product.barCodeNumber || '').includes(searchTerm)
+      || product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = activeTab === 'all' || product.category._id === activeTab;
+    return matchesSearch && matchesCategory;
+    // return matchesSearch;
+  });
 
   // Pagination logic
   // const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -42,7 +47,6 @@ export function POSProductGrid({ products }: POSProductGridProps) {
   // Reset to first page when search or category changes
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    // setCurrentPage(1);
   };
 
   const handleTabChange = (value: string) => {
@@ -80,16 +84,16 @@ export function POSProductGrid({ products }: POSProductGridProps) {
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={handleTabChange} className="flex-1 flex flex-col min-h-0">
         {/* Compact Category Tabs */}
-        {/* <div className="px-3 pt-2">
+        <div className="px-3 pt-2">
           <TabsList className="grid grid-flow-col auto-cols-max gap-1 h-8">
             <TabsTrigger value="all" className="text-xs px-2">All</TabsTrigger>
-            {MOCK_CATEGORIES.map((category) => (
-              <TabsTrigger key={category.id} value={category.id} className="text-xs px-2">
-                {category.name}
+            {categories.map((category) => (
+              <TabsTrigger key={category._id} value={category._id} className="text-xs px-2">
+                {category.categoryName}
               </TabsTrigger>
             ))}
           </TabsList>
-        </div> */}
+        </div>
 
         <TabsContent value={activeTab} className="flex-1 mt-2 flex flex-col min-h-0">
           {/* Compact Results Summary */}
@@ -113,8 +117,8 @@ export function POSProductGrid({ products }: POSProductGridProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {products.length > 0 ? (
-                    products.map((product, index) => {
+                  {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product, index) => {
                       const stockStatus = getStockStatus(product.quantity);
                       return (
                         <tr

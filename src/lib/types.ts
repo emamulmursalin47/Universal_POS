@@ -30,25 +30,29 @@ export interface Shop {
 
 export interface Product {
   _id: string;
-    productName: string;
-    sku: string;
-    category: Category;
-    buyPrice: number;
-    sellingPrice: number;
-    quantity: number;
-    unitType: string;
-    isActive: boolean;
-    brandName?: string;
-    barCodeNumber: string;
-    createdAt: string; // or Date
-    updatedAt: string;
+  productName: string;
+  sku: string;
+  category: Category;
+  buyPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  unitType: string;
+  isActive: boolean;
+  brandName?: string;
+  barCodeNumber: string;
+  createdAt: string; // or Date
+  updatedAt: string;
 }
 
 export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  shopId: string;
+  _id: string;
+  categoryName: string;
+  description: string;
+  status: string;
+  isDeleted: boolean;
+  createdAt: string; // or Date if you're converting it
+  updatedAt: string;
+  __v?: number;
 }
 
 export interface Sale {

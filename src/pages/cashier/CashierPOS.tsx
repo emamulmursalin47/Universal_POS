@@ -24,7 +24,7 @@ import {
   Check
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Product } from '@/lib/types';
+import { Product,Category } from '@/lib/types';
 import axios from 'axios';
 
 interface Customer {
@@ -268,6 +268,7 @@ export default function CashierPOS() {
   // const { user } = useAuth();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const fetchProducts = useCallback(async () => {
     try {
@@ -284,9 +285,25 @@ export default function CashierPOS() {
     }
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/v1/category/all-category', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      console.log(response.data.data);
+      setCategories(response.data.data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
   // In a real app, we would fetch the shop data from API
   // const shopData = user?.shopId 
@@ -318,7 +335,7 @@ export default function CashierPOS() {
       {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 flex-1 min-h-0">
         <div className="lg:col-span-2 min-h-0">
-          <POSProductGrid products={products} />
+          <POSProductGrid products={products} categories={categories} />
         </div>
         {/* <div className="min-h-0">
           <POSCart  />
