@@ -156,29 +156,38 @@ const InvoiceReceipt: React.FC = () => {
                         {/* Invoice Details */}
                         <div className="grid md:grid-cols-2 gap-8 mb-8">
                             <div>
-                                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                                <h3 className="text-lg font-semibold flex items-center">
                                     <User className="w-5 h-5 mr-2" />
                                     Bill To
                                 </h3>
                                 <div className=" text-gray-700">
                                     <p className="font-medium text-lg">{invoiceData.customerInfo.name}</p>
-                                    <div className="flex items-center">
-                                        <Mail className="w-4 h-4 mr-2 text-gray-500" />
-                                        <span>{invoiceData.customerInfo.email}</span>
-                                    </div>
-                                    <div className="flex items-center">
-                                        <Phone className="w-4 h-4 mr-2 text-gray-500" />
-                                        <span>{invoiceData.customerInfo.contact}</span>
-                                    </div>
-                                    <div className="flex items-start">
-                                        <MapPin className="w-4 h-4 mr-2 mt-1 text-gray-500" />
-                                        <span>{invoiceData.customerInfo.address}</span>
-                                    </div>
+                                    {
+                                        invoiceData.customerInfo.email &&
+                                        <div className="flex items-center">
+                                            <Mail className="w-4 h-4 mr-2 text-gray-500" />
+                                            <span>{invoiceData.customerInfo.email}</span>
+                                        </div>
+                                    }
+                                    {
+                                        invoiceData.customerInfo.contact &&
+                                        <div className="flex items-center">
+                                            <Phone className="w-4 h-4 mr-2 text-gray-500" />
+                                            <span>{invoiceData.customerInfo.contact}</span>
+                                        </div>
+                                    }
+                                    {
+                                        invoiceData.customerInfo.address &&
+                                        <div className="flex items-start">
+                                            <MapPin className="w-4 h-4 mr-2 mt-1 text-gray-500" />
+                                            <span>{invoiceData.customerInfo.address}</span>
+                                        </div>
+                                    }
                                 </div>
                             </div>
 
                             <div>
-                                <h3 className="text-lg font-semibold mb-4 flex items-center">
+                                <h3 className="text-lg font-semibold flex items-center">
                                     <Receipt className="w-5 h-5 mr-2" />
                                     Invoice Details
                                 </h3>

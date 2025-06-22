@@ -29,7 +29,7 @@ interface POSCartProps {
   setCart: Dispatch<SetStateAction<Product[]>>;
   products: Product[];
   catregories: Category[];
-
+  refreshProducts: () => void;
 }
 
 export type InvoiceData = {
@@ -58,7 +58,7 @@ export type InvoiceData = {
 };
 
 
-export function POSCart({ cart, setCart, selectedCustomer }: POSCartProps) {
+export function POSCart({ cart, setCart, selectedCustomer, refreshProducts }: POSCartProps) {
   const [discount, setDiscount] = useState("0");
   const [discountType, setDiscountType] = useState("cash");
   const [subtotalValue, setSubtotalValue] = useState(0);
@@ -172,9 +172,10 @@ export function POSCart({ cart, setCart, selectedCustomer }: POSCartProps) {
       })
       // console.log(response);
       setCart([]);
+      refreshProducts();
       alert('Invoice created successfully!');
     }
-  }, [cart, discountValue, selectedCustomer, setCart, subtotalValue, totalValue, transactionType]);
+  }, [cart, discountValue, selectedCustomer, setCart, subtotalValue, totalValue, transactionType, refreshProducts]);
 
   return (
     <div className="flex flex-col min-h-full border rounded-lg bg-card">

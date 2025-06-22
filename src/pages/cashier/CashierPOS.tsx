@@ -104,6 +104,7 @@ const CashierPOS = () => {
             setCart={setCart}
             products={products}
             catregories={categories}
+            refreshProducts={fetchProducts}
           />
         </div>
       </div>
