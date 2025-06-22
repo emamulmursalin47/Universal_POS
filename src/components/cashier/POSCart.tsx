@@ -20,6 +20,8 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { Customer, Product, Category } from '@/lib/types';
+import axios from 'axios';
+// import { POSPaymentModal } from './POSPaymentModal';
 
 interface POSCartProps {
   selectedCustomer?: Customer | null;
@@ -30,12 +32,39 @@ interface POSCartProps {
 
 }
 
-export function POSCart({ cart, setCart }: POSCartProps) {
+export type InvoiceData = {
+  customerInfo: {
+    name: string;
+    email: string;
+    contact: string;
+    address: string;
+  };
+  invoiceItems: {
+    productId: string;
+    sku: string;
+    productName: string;
+    quantity: number;
+    sellingPrice: number;
+    totalAmount: number;
+  }[];
+  subTotalAmount: number;
+  totalAmount: number;
+  discount: number;
+  dueAmount: number;
+  invoiceDate: string; // ISO string (e.g. "2025-06-19T00:00:00.000Z")
+  transactionType: "Cash" | "Card" | "MobileBanking" | string; // You can refine enum here
+  paymentStatus: "paid" | "unpaid" | "partial" | string; // Expand based on app logic
+  staffId: string;
+};
+
+
+export function POSCart({ cart, setCart, selectedCustomer }: POSCartProps) {
   const [discount, setDiscount] = useState("0");
   const [discountType, setDiscountType] = useState("cash");
   const [subtotalValue, setSubtotalValue] = useState(0);
   const [discountValue, setDiscountValue] = useState(0);
   const [totalValue, setTotalValue] = useState(0);
+  const [transactionType, setTransactionType] = useState('cash');
 
 
   const handleUpdateQuantity = (productId: string, buyquantity: number) => {
@@ -92,9 +121,63 @@ export function POSCart({ cart, setCart }: POSCartProps) {
       setCart([]);
     }
   };
+  const getUserIdFromToken = (): string | null => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
+
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      return decodedPayload.userId || ""; // adjust based on actual payload structure
+    } catch (error) {
+      console.error("Invalid token", error);
+      return "";
+    }
+  }
+  const handleSell = useCallback(async () => {
+    const todayMidnightUTC = new Date();
+    todayMidnightUTC.setUTCHours(0, 0, 0, 0);
+    const isoString = todayMidnightUTC.toISOString();
+    if (window.confirm('Sell?')) {
+      const updateInvoice: InvoiceData = {
+        customerInfo: {
+          name: selectedCustomer?.name || 'Guest',
+          email: selectedCustomer?.email || '',
+          contact: selectedCustomer?.contact || '',
+          address: selectedCustomer?.address || '',
+        },
+        invoiceItems: cart.map(item => ({
+          productId: item._id,
+          sku: item.sku,
+          productName: item.productName,
+          quantity: item.buyquantity || 1,
+          sellingPrice: item.sellingPrice,
+          totalAmount: item.sellingPrice * (item.buyquantity ?? 1),
+        })),
+        subTotalAmount: subtotalValue,
+        totalAmount: totalValue,
+        discount: discountValue,
+        dueAmount: totalValue,
+        invoiceDate: isoString,
+        transactionType: transactionType,
+        paymentStatus: transactionType === 'cash' ? 'paid' : 'unpaid',
+        staffId: getUserIdFromToken() || "",
+      }
+      // console.log('updateInvoice', updateInvoice);
+      await axios.post('/api/v1/invoice/create-invoice', updateInvoice, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      // console.log(response);
+      setCart([]);
+      alert('Invoice created successfully!');
+    }
+  }, [cart, discountValue, selectedCustomer, setCart, subtotalValue, totalValue, transactionType]);
 
   return (
-    <div className="flex flex-col h-full border rounded-lg bg-card">
+    <div className="flex flex-col min-h-full border rounded-lg bg-card">
       {/* Compact Header */}
       <div className="p-3 border-b flex items-center justify-between">
         <div>
@@ -120,7 +203,7 @@ export function POSCart({ cart, setCart }: POSCartProps) {
       </div>
 
       {/* Cart Items */}
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="flex-1 min-h-36">
         {cart.length > 0 ? (
           <div className="divide-y">
             {cart.map((item, index) => (
@@ -259,6 +342,24 @@ export function POSCart({ cart, setCart }: POSCartProps) {
               <span>৳ {totalValue.toFixed(2)}</span>
             </div>
 
+            <div className="flex items-center justify-between">
+              <div>
+                Transaction Type
+              </div>
+              <div>
+                <Select value={transactionType} onValueChange={setTransactionType}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Transaction Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="credit">Credit</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
             <div className="grid grid-cols-1 gap-2 mt-3">
               {/* <Button variant="outline" disabled={cart.length === 0} className="h-8 text-xs">
               <Printer className="h-3 w-3 mr-1" />
@@ -268,7 +369,8 @@ export function POSCart({ cart, setCart }: POSCartProps) {
                 <Button
                   className="bg-primary h-8 text-xs font-semibold"
                   disabled={cart.length === 0}
-                // onClick={() => setIsPaymentModalOpen(true)}
+                  // onClick={() => setIsPaymentModalOpen(true)}
+                  onClick={() => handleSell()}
                 >
                   <CreditCard className="h-3 w-3 mr-1" />
                   Pay
