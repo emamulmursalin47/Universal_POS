@@ -1,11 +1,10 @@
+// // routes/authRoutes.tsx
 
-// routes/authRoutes.tsx
+// import LoginPage from '@/pages/auth/LoginPage';
 
-import LoginPage from '@/pages/auth/LoginPage';
-
-export const authRoutes = [
-  {
-    path: "/login",
-    element: <LoginPage />
-  }
-];
+// export const authRoutes = [
+//   {
+//     path: "/login",
+//     element: <LoginPage />
+//   }
+// ];

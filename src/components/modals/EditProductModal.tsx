@@ -1,5 +1,4 @@
-// components/modals/EditProductModal.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +9,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -19,15 +17,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-import {  DollarSign, Barcode, Edit } from 'lucide-react';
-import { Product, ProductFormData } from '@/types/products';
-import { PRODUCT_CATEGORIES } from '@/constants/products';
+import { DollarSign, Edit } from 'lucide-react';
+import { Category, ProductFormData, ProductFormDataError, EditProductFormData } from '@/types/products';
+import axios from 'axios';
+
 
 interface EditProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  product: Product | null;
-  onUpdate: (updatedProduct: Product) => void;
+  product: ProductFormData | null;
+  onUpdate: () => void;
 }
 
 const EditProductModal: React.FC<EditProductModalProps> = ({
@@ -36,36 +35,31 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
   product,
   onUpdate,
 }) => {
-  const [formData, setFormData] = useState<ProductFormData>({
-    id: '',
-    name: '',
-    description: '',
-    category: '',
+  const [formData, setFormData] = useState<EditProductFormData>({
+    productName: "",
+    category: "",
     buyPrice: 0,
-    sellPrice: 0,
-    stock: 0,
-    minStock: 0,
-    barCode: '',
-    image: null,
+    sellingPrice: 0,
+    quantity: 0,
+    unitType: "" // e.g., 'piece', 'kg', 'box'
   });
 
-  const [errors, setErrors] = useState<Partial<ProductFormData>>({});
+  const [errors, setErrors] = useState<Partial<ProductFormDataError>>({});
+  const [categories, setCategories] = useState<Category[]>([]);
+  const unites = ['pcs', 'kgs', 'liters', 'boxes']
 
   // Populate form when product changes
   useEffect(() => {
     if (product) {
       setFormData({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        category: product.category,
+        productName: product.productName,
+        category: product.category._id,
         buyPrice: product.buyPrice,
-        sellPrice: product.sellPrice,
-        stock: product.stock,
-        minStock: product.minStock,
-        barCode: product.barCode,
-        image: product.image,
+        sellingPrice: product.sellingPrice,
+        quantity: product.quantity,
+        unitType: product.unitType,
       });
+
     }
   }, [product]);
 
@@ -74,42 +68,26 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<ProductFormData> = {};
+    const newErrors: Partial<ProductFormDataError> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Product name is required';
-    }
-
-    if (!formData.description.trim()) {
-      newErrors.description = 'Description is required';
+    if (!formData.productName.trim()) {
+      newErrors.productName = 'Product name is required';
     }
 
     if (!formData.category) {
       newErrors.category = 'Category is required';
     }
 
-    if (formData.buyPrice <= 0) {
+    if (formData.buyPrice as number <= 0) {
       newErrors.buyPrice = 'Buy price must be greater than 0';
     }
 
-    if (formData.sellPrice <= 0) {
-      newErrors.sellPrice = 'Sell price must be greater than 0';
+    if (formData.sellingPrice as number <= 0) {
+      newErrors.sellingPrice = 'Sell price must be greater than 0';
     }
 
-    if (formData.sellPrice <= formData.buyPrice) {
-      newErrors.sellPrice = 'Sell price must be greater than buy price';
-    }
-
-    if (formData.stock < 0) {
-      newErrors.stock = 'Stock cannot be negative';
-    }
-
-    if (formData.minStock < 0) {
-      newErrors.minStock = 'Minimum stock cannot be negative';
-    }
-
-    if (!formData.barCode.trim()) {
-      newErrors.barCode = 'Barcode is required';
+    if (formData.quantity as number < 0) {
+      newErrors.quantity = 'Stock cannot be negative';
     }
 
     setErrors(newErrors);
@@ -118,25 +96,25 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!product) return;
-    
+
     if (validateForm()) {
-      const updatedProduct: Product = {
-        ...product,
-        name: formData.name,
-        description: formData.description,
+      const updatedProduct: ProductFormData = {
+        productName: formData.productName,
         category: formData.category,
         buyPrice: formData.buyPrice,
-        sellPrice: formData.sellPrice,
-        stock: formData.stock,
-        minStock: formData.minStock,
-        barCode: formData.barCode,
-      
-        updatedAt: new Date(),
+        sellingPrice: formData.sellingPrice,
+        quantity: formData.quantity,
+        unitType: formData.unitType,
       };
-
-      onUpdate(updatedProduct);
+      axios.patch(`/api/v1/product/update-product/${product._id}`, updatedProduct, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`
+        },
+      })
+      // console.log(response);
+      onUpdate();
       resetForm();
       onClose();
     }
@@ -147,10 +125,24 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
     onClose();
   };
 
-  const generateBarcode = () => {
-    const barcode = Math.floor(Math.random() * 9000000000000) + 1000000000000;
-    setFormData(prev => ({ ...prev, barCode: barcode.toString() }));
-  };
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await axios.get('/api/v1/category/all-category', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`
+        },
+      });
+      setCategories(response.data.data);
+      // console.log('Categories:', response.data.data);
+    } catch {
+      // console.error('Error fetching categories:', error);
+      return [];
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   if (!product) return null;
 
@@ -160,7 +152,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Edit className="h-5 w-5" />
-            Edit Product: {product.name}
+            Edit Product: {product.productName}
           </DialogTitle>
         </DialogHeader>
 
@@ -168,34 +160,34 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Basic Information</h3>
-            
+
             {/* Product ID (Read-only) */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="productId">Product ID</Label>
               <Input
                 id="productId"
-                value={formData.id}
+                value={formData.}
                 disabled
                 className="bg-gray-100"
               />
               <p className="text-xs text-gray-500">Product ID cannot be changed</p>
-            </div>
+            </div> */}
 
             {/* Product Name */}
             <div className="space-y-2">
               <Label htmlFor="productName">Product Name *</Label>
               <Input
                 id="productName"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                value={formData.productName}
+                onChange={(e) => setFormData(prev => ({ ...prev, productName: e.target.value }))}
                 placeholder="Enter product name"
-                className={errors.name ? 'border-red-500' : ''}
+                className={errors.productName ? 'border-red-500' : ''}
               />
-              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+              {errors.productName && <p className="text-sm text-red-500">{errors.productName}</p>}
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="description">Description *</Label>
               <Textarea
                 id="description"
@@ -206,26 +198,27 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 className={errors.description ? 'border-red-500' : ''}
               />
               {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
-            </div>
+            </div> */}
 
             {/* Category */}
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select
-                value={formData.category}
+                value={formData.category} // This determines the selected item
                 onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
               >
                 <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select a category" />
                 </SelectTrigger>
                 <SelectContent>
-                  {PRODUCT_CATEGORIES.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
+                  {categories.map((category, index) => (
+                    <SelectItem key={index} value={category._id}>
+                      {category.categoryName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+
               {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
             </div>
           </div>
@@ -236,7 +229,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
               <DollarSign className="h-5 w-5" />
               Pricing Information
             </h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Buy Price */}
               <div className="space-y-2">
@@ -262,28 +255,47 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                   type="number"
                   step="0.01"
                   min="0"
-                  value={formData.sellPrice}
-                  onChange={(e) => setFormData(prev => ({ ...prev, sellPrice: parseFloat(e.target.value) || 0 }))}
+                  value={formData.sellingPrice}
+                  onChange={(e) => setFormData(prev => ({ ...prev, sellingPrice: parseFloat(e.target.value) || 0 }))}
                   placeholder="0.00"
-                  className={errors.sellPrice ? 'border-red-500' : ''}
+                  className={errors.sellingPrice ? 'border-red-500' : ''}
                 />
-                {errors.sellPrice && <p className="text-sm text-red-500">{errors.sellPrice}</p>}
+                {errors.sellingPrice && <p className="text-sm text-red-500">{errors.sellingPrice}</p>}
               </div>
             </div>
 
             {/* Profit Margin Display */}
-            {formData.buyPrice > 0 && formData.sellPrice > 0 && (
-              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+            {formData.buyPrice as number > 0 && formData.sellingPrice as number > 0 && (
+              <div
+                className={`p-3 rounded-lg ${formData.buyPrice > formData.sellingPrice
+                  ? 'bg-red-50 border border-red-200'
+                  : 'bg-green-50 border border-green-200'
+                  }`}
+              >
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-green-700">Profit Margin:</span>
-                  <span className="font-medium text-green-800">
-                    {(((formData.sellPrice - formData.buyPrice) / formData.buyPrice) * 100).toFixed(1)}%
+                  <span className={`${formData.buyPrice > formData.sellingPrice
+                    ? 'text-red-700'
+                    : 'text-green-700'
+                    }`}>
+                    Profit Margin:
+                  </span>
+                  <span className={`font-medium ${formData.buyPrice > formData.sellingPrice
+                    ? 'text-red-800'
+                    : 'text-green-800'
+                    }`}>
+                    {(((formData.sellingPrice as number - formData.buyPrice as number) / formData.buyPrice as number) * 100).toFixed(1)}%
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm mt-1">
-                  <span className="text-green-700">Profit per unit:</span>
-                  <span className="font-medium text-green-800">
-                    ${(formData.sellPrice - formData.buyPrice).toFixed(2)}
+                  <span className={`${formData.buyPrice > formData.sellingPrice
+                    ? 'text-red-700'
+                    : 'text-green-700'
+                    }`}>Profit per unit:</span>
+                  <span className={`font-medium ${formData.buyPrice > formData.sellingPrice
+                    ? 'text-red-800'
+                    : 'text-green-800'
+                    }`}>
+                    ৳ {(formData.sellingPrice as number - formData.buyPrice as number).toFixed(2)}
                   </span>
                 </div>
               </div>
@@ -293,7 +305,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
           {/* Stock Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Stock Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Current Stock */}
               <div className="space-y-2">
@@ -302,16 +314,36 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                   id="stock"
                   type="number"
                   min="0"
-                  value={formData.stock}
-                  onChange={(e) => setFormData(prev => ({ ...prev, stock: parseInt(e.target.value) || 0 }))}
+                  value={formData.quantity}
+                  onChange={(e) => setFormData(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
                   placeholder="0"
-                  className={errors.stock ? 'border-red-500' : ''}
+                  className={errors.quantity ? 'border-red-500' : ''}
                 />
-                {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
+                {errors.quantity && <p className="text-sm text-red-500">{errors.quantity}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Unit *</Label>
+                <Select
+                  value={formData.unitType}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, unitType: value }))}
+                >
+                  <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select Unit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {unites.map((unit, index) => (
+                      <SelectItem key={index} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
               </div>
 
               {/* Minimum Stock */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="minStock">Minimum Stock Level *</Label>
                 <Input
                   id="minStock"
@@ -326,34 +358,34 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 <p className="text-xs text-gray-500">
                   You'll be alerted when stock falls below this level
                 </p>
-              </div>
+              </div> */}
             </div>
 
             {/* Stock Status Warning */}
-            {formData.stock <= formData.minStock && formData.stock > 0 && (
+            {/* {formData.quantity <= formData.minStock && formData.stock > 0 && (
               <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-800">
                   ⚠️ Warning: Current stock is at or below the minimum stock level
                 </p>
               </div>
-            )}
+            )} */}
 
-            {formData.stock === 0 && (
+            {/* {formData.stock === 0 && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
                 <p className="text-sm text-red-800">
                   🚨 Alert: Product is currently out of stock
                 </p>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Barcode */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-lg font-medium flex items-center gap-2">
               <Barcode className="h-5 w-5" />
               Product Identification
             </h3>
-            
+
             <div className="space-y-2">
               <Label htmlFor="barCode">Barcode *</Label>
               <div className="flex gap-2">
@@ -376,16 +408,16 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
               </div>
               {errors.barCode && <p className="text-sm text-red-500">{errors.barCode}</p>}
             </div>
-          </div>
+          </div> */}
 
           {/* Product Status Info */}
-          <div className="p-4 bg-gray-50 rounded-lg">
+          {/* <div className="p-4 bg-gray-50 rounded-lg">
             <h4 className="font-medium mb-2">Product Status Information</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">Current Status:</span>
                 <span className={`ml-2 font-medium ${product.status === 'active' ? 'text-green-600' : 'text-red-600'}`}>
-                  {product.status === 'active' ? 'Active' : 'Inactive'}
+                  {product. === 'active' ? 'Active' : 'Inactive'}
                 </span>
               </div>
               <div>
@@ -395,7 +427,7 @@ const EditProductModal: React.FC<EditProductModalProps> = ({
                 </span>
               </div>
             </div>
-          </div>
+          </div> */}
 
           <DialogFooter className="flex flex-col sm:flex-row gap-2">
             <Button type="button" variant="outline" onClick={handleClose} className="w-full sm:w-auto">

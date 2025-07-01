@@ -1,31 +1,31 @@
-// components/EditStaffModal.tsx
 import React, { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Staff, StaffFormData, StaffFormErrors } from '@/types/staff';
+import { StaffFormData, StaffFormErrors, StaffTypesNew } from '@/types/staff';
 import { validateStaffForm } from '@/utils/staffUtiils';
-import { STAFF_ROLES } from '@/constants/staff';
+import axios from 'axios';
 
 interface EditStaffModalProps {
   isOpen: boolean;
   onClose: () => void;
-  staff: Staff | null;
-  onUpdate: (staff: Staff) => void;
+  staff: StaffTypesNew | null;
+  // onUpdate: (staff: StaffTypesNew) => void;
 }
 
 const EditStaffModal: React.FC<EditStaffModalProps> = ({
   isOpen,
   onClose,
   staff,
-  onUpdate
+  // onUpdate
 }) => {
   const [formData, setFormData] = useState<StaffFormData>({
-    id: '',
-    name: '',
+    fullName: '',
+    email: '',
     role: '',
-    loginId: '',
-    password: '',
-    email: ''
+    contactNumber: '',
+    address: '',
+    // password: '',
+    status: '',
   });
 
   const [errors, setErrors] = useState<StaffFormErrors>({});
@@ -34,12 +34,13 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
   useEffect(() => {
     if (staff && isOpen) {
       setFormData({
-        id: staff.id,
-        name: staff.name,
+        fullName: staff.fullName,
         email: staff.email,
         role: staff.role,
-        loginId: staff.loginId,
-        password: staff.password
+        contactNumber: staff.contactNumber || '',
+        address: staff.address || '',
+        // password: '', // Password is not typically pre-filled
+        status: staff.status || 'active',
       });
     }
   }, [staff, isOpen]);
@@ -49,46 +50,49 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
       ...prev,
       [field]: value
     }));
-    
-    if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  }, [errors]);
+
+    // if (errors[field]) {
+    //   setErrors(prev => ({
+    //     ...prev,
+    //     [field]: undefined
+    //   }));
+    // }
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     const validationErrors = validateStaffForm(formData);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const updatedStaff: Staff = {
-        ...staff!,
-        name: formData.name,
+      if (!staff) return;
+      const updatedStaff: StaffFormData = {
+        fullName: formData.fullName,
         email: formData.email,
-        role: formData.role as Staff['role'],
-        loginId: formData.loginId,
-        password: formData.password,
-        updatedAt: new Date()
+        contactNumber: formData.contactNumber,
+        address: formData.address,
       };
-      
-      onUpdate(updatedStaff);
+      // console.log('id', staff?.user);
+      const response = await axios.patch(`/api/v1/shop-role/update-staff/${staff.user}`, updatedStaff, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      console.log(response);
       onClose();
     } catch (error) {
       console.error('Error updating staff member:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [formData, staff, onUpdate, onClose]);
+  }, [formData, staff, onClose]);
 
   const handleClose = useCallback(() => {
     setErrors({});
@@ -104,25 +108,22 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-900 mb-6">Edit Staff Member</h2>
 
           <div className="space-y-4">
-           
 
+            {/* Full Name */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Full Name <span className="text-red-500">*</span>
-              </label>
+              <label className="text-sm font-medium text-gray-700">Full Name <span className="text-red-500">*</span></label>
               <Input
                 placeholder="Enter full name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className={errors.name ? 'border-red-500' : ''}
+                value={formData.fullName}
+                onChange={(e) => handleInputChange('fullName', e.target.value)}
+                className={errors.fullName ? 'border-red-500' : ''}
               />
-              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+              {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
             </div>
 
+            {/* Email */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Email Address <span className="text-red-500">*</span>
-              </label>
+              <label className="text-sm font-medium text-gray-700">Email <span className="text-red-500">*</span></label>
               <Input
                 type="email"
                 placeholder="Enter email address"
@@ -133,40 +134,67 @@ const EditStaffModal: React.FC<EditStaffModalProps> = ({
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Role <span className="text-red-500">*</span>
-              </label>
+            {/* Role */}
+            {/* <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Role <span className="text-red-500">*</span></label>
               <select
                 value={formData.role}
                 onChange={(e) => handleInputChange('role', e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                className={`w-full px-3 py-2 border rounded-md text-sm ${
                   errors.role ? 'border-red-500' : 'border-gray-300'
                 }`}
               >
                 <option value="">Select a role</option>
-                {STAFF_ROLES.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
+                
               </select>
               {errors.role && <p className="text-sm text-red-500">{errors.role}</p>}
+            </div> */}
+
+            {/* Contact Number */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Contact Number</label>
+              <Input
+                placeholder="Enter contact number"
+                value={formData.contactNumber}
+                onChange={(e) => handleInputChange('contactNumber', e.target.value)}
+              />
             </div>
 
+            {/* Address */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Password <span className="text-red-500">*</span>
-              </label>
+              <label className="text-sm font-medium text-gray-700">Address</label>
+              <Input
+                placeholder="Enter address"
+                value={formData.address}
+                onChange={(e) => handleInputChange('address', e.target.value)}
+              />
+            </div>
+
+            {/* Status */}
+            {/* <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Status</label>
+              <select
+                value={formData.status}
+                onChange={(e) => handleInputChange('status', e.target.value)}
+                className="w-full px-3 py-2 border rounded-md text-sm border-gray-300"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div> */}
+
+            {/* Password */}
+            {/* <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Password</label>
               <Input
                 type="password"
-                placeholder="Enter password"
+                placeholder="Enter new password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 className={errors.password ? 'border-red-500' : ''}
               />
               {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
-            </div>
+            </div> */}
           </div>
 
           <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">

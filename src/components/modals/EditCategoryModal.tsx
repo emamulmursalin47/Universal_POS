@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Category } from "@/types/category";
 import { useEffect, useState } from "react";
 
@@ -11,29 +11,29 @@ interface EditCategoryModalProps {
   category: Category;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedCategory: Category) => void;
+  onSave: ({_id, categoryName, description }: {_id: string, categoryName: string, description: string }) => void;
 }
 
-export function EditCategoryModal({ 
-  category, 
-  open, 
-  onOpenChange, 
-  onSave 
+export function EditCategoryModal({
+  category,
+  open,
+  onOpenChange,
+  onSave
 }: EditCategoryModalProps) {
-  const [name, setName] = useState(category.name);
+  const [name, setName] = useState(category.categoryName);
   const [description, setDescription] = useState(category.description || "");
 
   useEffect(() => {
-    setName(category.name);
+    setName(category.categoryName);
     setDescription(category.description || "");
   }, [category]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      ...category,
-      name,
-      description: description || undefined
+      _id: category._id,
+      categoryName: name,
+      description: description
     });
     onOpenChange(false);
   };
@@ -43,7 +43,11 @@ export function EditCategoryModal({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Category</DialogTitle>
+          <DialogDescription>
+            Make changes and save when you're done.
+          </DialogDescription>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Category Name</Label>

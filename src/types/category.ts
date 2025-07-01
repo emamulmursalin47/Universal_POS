@@ -1,8 +1,12 @@
 // types.ts
 export interface Category {
-  id: string;
-  name: string;
-  description?: string;
+  _id: string;
+  categoryName: string;
+  description: string;
+  status?: string;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Product {

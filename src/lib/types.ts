@@ -29,26 +29,31 @@ export interface Shop {
 }
 
 export interface Product {
-  id: string;
-  name: string;
-  description: string;
+  _id: string;
+  productName: string;
   sku: string;
-  barcode?: string;
-  price: number;
-  cost: number;
-  stock: number;
-  categoryId: string;
-  shopId: string;
-  image?: string;
-  createdAt: string;
+  category: Category;
+  buyPrice: number;
+  sellingPrice: number;
+  quantity: number;
+  unitType: string;
+  isActive: boolean;
+  brandName?: string;
+  barCodeNumber: string;
+  createdAt: string; // or Date
   updatedAt: string;
+  buyquantity?: number;
 }
 
 export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  shopId: string;
+  _id: string;
+  categoryName: string;
+  description: string;
+  status: string;
+  isDeleted: boolean;
+  createdAt: string; // or Date if you're converting it
+  updatedAt: string;
+  __v?: number;
 }
 
 export interface Sale {
@@ -76,23 +81,32 @@ export interface SaleItem {
 }
 
 export interface Customer {
-  id: string;
+  _id?: string;
   name: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  shopId: string;
+  email: string;
+  contact: string;
+  address: string;
+  isDeleted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
-
 export interface SubscriptionPlan {
   id: string;
-  name: string;
+  name?: string;
+  // supportLevel: 'basic' | 'standard' | 'premium';
+  _id: string;
+  planName: string;
   price: number;
-  billingCycle: 'monthly' | 'yearly';
-  features: string[];
+  description?: string;
+  billingCycle: string[] | 'monthly' | 'yearly' | 'quarterly'; // assuming these are the only two options
   maxProducts: number;
   maxUsers: number;
-  supportLevel: 'basic' | 'standard' | 'premium';
+  supportLevel: string;
+  features: string[];
+  status: 'active' | 'inactive'; // assuming a limited set of statuses
+  createdAt: string; // or `Date` if parsed
+  updatedAt: string; // or `Date` if parsed
+
 }
 
 export interface DecodedToken {

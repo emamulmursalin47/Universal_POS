@@ -1,274 +1,225 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import type { RootState } from '@/redux';
-import { 
-  updateItemQuantity, 
-  removeItem, 
-  applyItemDiscount, 
-  applyCartDiscount, 
-  clearCart 
-} from '@/redux/slices/cartSlice';
+import { useCallback, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction } from "react";
+import { Input } from "@/components/ui/input";
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Trash2, 
-  Plus, 
-  Minus, 
-  Tag, 
-  CreditCard, 
-  Save, 
+import {
+  Trash2,
+  Plus,
+  Minus,
+  CreditCard,
   ShoppingBag,
-  Printer,
-  Percent,
-  DollarSign,
-  X
 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { POSPaymentModal } from './POSPaymentModal';
-
-interface Customer {
-  id: string;
-  name: string;
-  phone: string;
-  email?: string;
-  totalPurchases?: number;
-}
-
-interface DiscountModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onApply: (type: 'percentage' | 'amount', value: number) => void;
-  currentDiscount?: number;
-  itemPrice?: number;
-  isCartDiscount?: boolean;
-}
-
-function DiscountModal({ isOpen, onClose, onApply, currentDiscount = 0, itemPrice, isCartDiscount = false }: DiscountModalProps) {
-  const [discountType, setDiscountType] = useState<'percentage' | 'amount'>('percentage');
-  const [discountValue, setDiscountValue] = useState('');
-
-  const handleApply = () => {
-    const value = parseFloat(discountValue);
-    if (isNaN(value) || value <= 0) return;
-    
-    let finalDiscount = value;
-    if (discountType === 'percentage') {
-      if (value > 100) return;
-      if (itemPrice) {
-        finalDiscount = (itemPrice * value) / 100;
-      }
-    }
-    
-    onApply(discountType, finalDiscount);
-    setDiscountValue('');
-    onClose();
-  };
-
-  const quickDiscounts = [5, 10, 15, 20, 25, 50];
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle className="text-base">
-            {isCartDiscount ? 'Cart Discount' : 'Item Discount'}
-          </DialogTitle>
-        </DialogHeader>
-        <div className="space-y-3">
-          <div>
-            <Label className="text-sm">Type</Label>
-            <Select value={discountType} onValueChange={(value) => setDiscountType(value as 'percentage' | 'amount')}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="percentage">Percentage (%)</SelectItem>
-                <SelectItem value="amount">Fixed Amount ($)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-sm">Value</Label>
-            <div className="relative">
-              {discountType === 'percentage' ? (
-                <Percent className="absolute right-2 top-2 h-3 w-3 text-muted-foreground" />
-              ) : (
-                <DollarSign className="absolute left-2 top-2 h-3 w-3 text-muted-foreground" />
-              )}
-              <Input
-                type="number"
-                placeholder={discountType === 'percentage' ? '%' : '$'}
-                value={discountValue}
-                onChange={(e) => setDiscountValue(e.target.value)}
-                className={`h-8 ${discountType === 'amount' ? 'pl-7' : 'pr-7'}`}
-                min="0"
-                max={discountType === 'percentage' ? '100' : undefined}
-                step="0.01"
-              />
-            </div>
-          </div>
-
-          {discountType === 'percentage' && (
-            <div>
-              <Label className="text-xs text-muted-foreground">Quick %</Label>
-              <div className="grid grid-cols-3 gap-1 mt-1">
-                {quickDiscounts.map((percent) => (
-                  <Button
-                    key={percent}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDiscountValue(percent.toString())}
-                    className="h-7 text-xs"
-                  >
-                    {percent}%
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {currentDiscount > 0 && (
-            <div className="p-2 bg-yellow-50 rounded text-xs border border-yellow-200">
-              <span className="text-yellow-800">Current: ${currentDiscount.toFixed(2)}</span>
-            </div>
-          )}
-
-          <div className="flex gap-2 pt-2">
-            <Button variant="outline" onClick={onClose} className="flex-1 h-8 text-xs">
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleApply}
-              disabled={!discountValue || parseFloat(discountValue) <= 0}
-              className="flex-1 h-8 text-xs"
-            >
-              Apply
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { Customer, Product, Category } from '@/lib/types';
+import axios from 'axios';
+// import { POSPaymentModal } from './POSPaymentModal';
 
 interface POSCartProps {
   selectedCustomer?: Customer | null;
+  cart: Product[];
+  setCart: Dispatch<SetStateAction<Product[]>>;
+  products: Product[];
+  catregories: Category[];
+  refreshProducts: () => void;
 }
 
-export function POSCart({ selectedCustomer }: POSCartProps) {
-  const dispatch = useDispatch();
-  const { items, subtotal, tax, discount, total } = useSelector((state: RootState) => state.cart);
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [discountModal, setDiscountModal] = useState<{
-    isOpen: boolean;
-    productId?: string;
-    itemPrice?: number;
-    currentDiscount?: number;
-    isCartDiscount?: boolean;
-  }>({
-    isOpen: false,
-    isCartDiscount: false
-  });
-  
-  const handleUpdateQuantity = (productId: string, quantity: number) => {
-    if (quantity < 1) return;
-    dispatch(updateItemQuantity({ productId, quantity }));
+export type InvoiceData = {
+  customerInfo: {
+    name: string;
+    email: string;
+    contact: string;
+    address: string;
   };
-  
+  invoiceItems: {
+    productId: string;
+    sku: string;
+    productName: string;
+    quantity: number;
+    sellingPrice: number;
+    totalAmount: number;
+  }[];
+  subTotalAmount: number;
+  totalAmount: number;
+  discount: number;
+  dueAmount: number;
+  invoiceDate: string; // ISO string (e.g. "2025-06-19T00:00:00.000Z")
+  transactionType: "Cash" | "Card" | "MobileBanking" | string; // You can refine enum here
+  paymentStatus: "paid" | "unpaid" | "partial" | string; // Expand based on app logic
+  staffId: string;
+};
+
+
+export function POSCart({ cart, setCart, selectedCustomer, refreshProducts }: POSCartProps) {
+  const [discount, setDiscount] = useState("0");
+  const [discountType, setDiscountType] = useState("cash");
+  const [subtotalValue, setSubtotalValue] = useState(0);
+  const [discountValue, setDiscountValue] = useState(0);
+  const [totalValue, setTotalValue] = useState(0);
+  const [transactionType, setTransactionType] = useState('cash');
+
+
+  const handleUpdateQuantity = (productId: string, buyquantity: number) => {
+    const selectedProduct = cart.find(item => item._id === productId);
+    if (!selectedProduct || buyquantity < 1 || buyquantity > selectedProduct.quantity) return;
+
+    const updatedCart = cart.map(item => {
+      if (item._id === productId) {
+        return { ...item, buyquantity };
+      }
+      return item;
+    });
+    setCart(updatedCart);
+
+  };
+
   const handleRemoveItem = (productId: string) => {
-    dispatch(removeItem(productId));
-  };
-  
-  const openItemDiscountModal = (productId: string, itemPrice: number, currentDiscount: number) => {
-    setDiscountModal({
-      isOpen: true,
-      productId,
-      itemPrice,
-      currentDiscount,
-      isCartDiscount: false
-    });
-  };
-
-  const openCartDiscountModal = () => {
-    setDiscountModal({
-      isOpen: true,
-      currentDiscount: discount,
-      isCartDiscount: true
-    });
-  };
-
-  const handleApplyDiscount = (type: 'percentage' | 'amount', value: number) => {
-    if (discountModal.isCartDiscount) {
-      dispatch(applyCartDiscount(value));
-    } else if (discountModal.productId) {
-      dispatch(applyItemDiscount({ productId: discountModal.productId, discount: value }));
+    if (window.confirm("Are you sure you want to remove this item from the cart?")) {
+      const updatedCart = cart.filter(item => item._id !== productId);
+      setCart(updatedCart);
     }
   };
-  
+
+  const subtotal = useCallback(async () => {
+    let sum = 0;
+    cart.forEach(item => {
+      sum += item.sellingPrice * (item.buyquantity ?? 1);
+    });
+    setSubtotalValue(sum);
+    return sum;
+  }, [cart]);
+
+  const calculateDiscount = useCallback(async (discountValue: string, subtotal: number, type: string) => {
+    const amount = parseFloat(discountValue) || 0;
+    if (type === "percent") {
+      setDiscountValue((amount / 100) * subtotal);
+    } else {
+      setDiscountValue(amount);
+    }
+  }, []);
+
+  const total = useCallback(async () => {
+    setTotalValue(subtotalValue - discountValue);
+  }, [subtotalValue, discountValue]);
+
+  useEffect(() => {
+    subtotal();
+    calculateDiscount(discount, subtotalValue, discountType);
+    total();
+  }, [cart, discount, discountType, discountValue, subtotalValue, subtotal, calculateDiscount, total]);
+
   const handleClearCart = () => {
     if (window.confirm('Clear cart?')) {
-      dispatch(clearCart());
+      setCart([]);
     }
   };
+  const getUserIdFromToken = (): string | null => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return null;
 
-  const removeItemDiscount = (productId: string) => {
-    dispatch(applyItemDiscount({ productId, discount: 0 }));
-  };
-
-  const removeCartDiscount = () => {
-    dispatch(applyCartDiscount(0));
-  };
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const decodedPayload = JSON.parse(atob(payloadBase64));
+      return decodedPayload.userId || ""; // adjust based on actual payload structure
+    } catch (error) {
+      console.error("Invalid token", error);
+      return "";
+    }
+  }
+  const handleSell = useCallback(async () => {
+    const todayMidnightUTC = new Date();
+    todayMidnightUTC.setUTCHours(0, 0, 0, 0);
+    const isoString = todayMidnightUTC.toISOString();
+    if (window.confirm('Sell?')) {
+      const updateInvoice: InvoiceData = {
+        customerInfo: {
+          name: selectedCustomer?.name || 'Guest',
+          email: selectedCustomer?.email || '',
+          contact: selectedCustomer?.contact || '',
+          address: selectedCustomer?.address || '',
+        },
+        invoiceItems: cart.map(item => ({
+          productId: item._id,
+          sku: item.sku,
+          productName: item.productName,
+          quantity: item.buyquantity || 1,
+          sellingPrice: item.sellingPrice,
+          totalAmount: item.sellingPrice * (item.buyquantity ?? 1),
+        })),
+        subTotalAmount: subtotalValue,
+        totalAmount: totalValue,
+        discount: discountValue,
+        dueAmount: totalValue,
+        invoiceDate: isoString,
+        transactionType: transactionType,
+        paymentStatus: transactionType === 'cash' ? 'paid' : 'unpaid',
+        staffId: getUserIdFromToken() || "",
+      }
+      // console.log('updateInvoice', updateInvoice);
+      await axios.post('/api/v1/invoice/create-invoice', updateInvoice, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      // console.log(response);
+      setCart([]);
+      refreshProducts();
+      alert('Invoice created successfully!');
+    }
+  }, [cart, discountValue, selectedCustomer, setCart, subtotalValue, totalValue, transactionType, refreshProducts]);
 
   return (
-    <div className="flex flex-col h-full border rounded-lg bg-card">
+    <div className="flex flex-col min-h-full border rounded-lg bg-card">
       {/* Compact Header */}
       <div className="p-3 border-b flex items-center justify-between">
         <div>
-          <h2 className="font-semibold">Cart ({items.length})</h2>
+          <h2 className="font-semibold">Cart ({cart.length})</h2>
         </div>
         <div className="flex gap-1">
-          <Button variant="outline" size="sm" onClick={handleClearCart} disabled={items.length === 0} className="h-7 px-2 text-xs">
+          <Button variant="default" size="sm"
+            onClick={handleClearCart}
+            disabled={cart.length === 0}
+            className="h-7 px-2 text-xs"
+          >
             <Trash2 className="h-3 w-3 mr-1" />
             Clear
           </Button>
-          <Button variant="outline" size="sm" disabled={items.length === 0} className="h-7 px-2 text-xs">
+          {/* <Button variant="outline" size="sm"
+            disabled={cart.length === 0}
+            className="h-7 px-2 text-xs"
+          >
             <Save className="h-3 w-3 mr-1" />
             Hold
-          </Button>
+          </Button> */}
         </div>
       </div>
-      
+
       {/* Cart Items */}
-      <ScrollArea className="flex-1 min-h-0">
-        {items.length > 0 ? (
+      <ScrollArea className="flex-1 min-h-36">
+        {cart.length > 0 ? (
           <div className="divide-y">
-            {items.map((item) => (
-              <div key={item.product.id} className="p-3 hover:bg-muted/30 transition-colors">
-                <div className="flex justify-between items-start gap-2">
+            {cart.map((item, index) => (
+              <div key={index} className="p-3 hover:bg-muted/30 transition-colors">
+                <div className="flex justify-between items-center gap-2">
+                  <div>
+                    {index + 1}.
+                  </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm leading-tight truncate">{item.product.name}</h3>
+                    <h3 className="font-medium text-sm leading-tight truncate">{item.productName}</h3>
+                    <h6 className="text-[9px] text-muted-foreground mt-0.5">{item.sku}</h6>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      ${item.product.price.toFixed(2)} each
+                      ৳ {item.sellingPrice.toFixed(2)}/ {item.unitType} X {item.buyquantity ?? 1} = <span className="font-semibold text-black"> ৳ {(item.sellingPrice * (item.buyquantity ?? 1)).toFixed(2)}</span>
                     </p>
-                    {item.discount > 0 && (
+                    {/* {item.discount > 0 && (
                       <div className="flex items-center gap-1 mt-1">
                         <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 px-1 py-0">
                           -${item.discount.toFixed(2)}
@@ -282,52 +233,44 @@ export function POSCart({ selectedCustomer }: POSCartProps) {
                           <X className="h-2 w-2" />
                         </Button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-sm">${item.total.toFixed(2)}</div>
-                    {item.discount > 0 && (
+                    {/* <div className="font-bold text-sm">${item.total.toFixed(2)}</div> */}
+                    {/* {item.discount > 0 && (
                       <div className="text-xs text-muted-foreground line-through">
                         ${(item.product.price * item.quantity).toFixed(2)}
                       </div>
-                    )}
+                    )} */}
                     <div className="flex items-center mt-1 bg-muted/50 rounded p-0.5">
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
-                        className="h-6 w-6 p-0"
-                        onClick={() => handleUpdateQuantity(item.product.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
+                        className="h-6 w-6 p-0 dark:text-black"
+                        onClick={() => handleUpdateQuantity(item._id, (item.buyquantity ?? 1) - 1)}
+                        disabled={(item.buyquantity ?? 1) <= 1}
                       >
                         <Minus className="h-3 w-3" />
                       </Button>
-                      <span className="w-8 text-center text-xs font-medium">{item.quantity}</span>
+                      <span className="w-8 text-center text-xs font-medium">{item.buyquantity}</span>
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
                         className="h-6 w-6 p-0"
-                        onClick={() => handleUpdateQuantity(item.product.id, item.quantity + 1)}
+                        onClick={() => handleUpdateQuantity(item._id, (item.buyquantity ?? 1) + 1)}
+                        disabled={(item.buyquantity ?? 1) >= item.quantity}
                       >
                         <Plus className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
                 </div>
-                <div className="flex mt-2 gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1 h-6 text-xs"
-                    onClick={() => openItemDiscountModal(item.product.id, item.product.price * item.quantity, item.discount)}
-                  >
-                    <Tag className="h-3 w-3 mr-1" />
-                    {item.discount > 0 ? 'Edit' : 'Discount'}
-                  </Button>
-                  <Button 
-                    variant="outline" 
+                <div className="flex mt-2 gap-1 flex-wrap flex-row-reverse">
+                  <Button
+                    variant="outline"
                     size="sm"
                     className="h-6 px-2 text-xs text-red-500 hover:text-red-600"
-                    onClick={() => handleRemoveItem(item.product.id)}
+                    onClick={() => handleRemoveItem(item._id)}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -345,83 +288,108 @@ export function POSCart({ selectedCustomer }: POSCartProps) {
           </div>
         )}
       </ScrollArea>
-      
+
       {/* Compact Totals */}
-      <div className="p-3 border-t bg-muted/10">
-        <div className="space-y-1.5 text-sm">
-          <div className="flex justify-between">
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between">
+      {cart.length > 0 &&
+        <div className="p-3 border-t bg-muted/10">
+          <div className="space-y-1.5 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              {cart.length > 0 &&
+                <span>৳ {subtotalValue.toFixed(2)}</span>
+              }
+            </div>
+            {/* <div className="flex justify-between">
             <span>Tax (10%)</span>
             <span>${tax.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Discount</span>
-            <div className="flex items-center gap-1">
-              <span className="text-green-600">-${discount.toFixed(2)}</span>
-              {discount > 0 ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 text-red-500"
-                  onClick={removeCartDiscount}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 px-1 text-xs"
-                  onClick={openCartDiscountModal}
-                  disabled={items.length === 0}
-                >
-                  <Tag className="h-2 w-2" />
-                </Button>
-              )}
+          </div> */}
+            <div className="flex justify-between items-center">
+              <span className="flex items-center flex-wrap gap-1">
+                Discount
+                <span className="flex gap-1 flex-wrap items-center">
+                  <Select value={discountType} onValueChange={setDiscountType}>
+                    <SelectTrigger className="w-[120px]">
+                      <SelectValue placeholder="Type Discount" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="percent">Percent</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    type="number"
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                    className="w-16 text-right [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+                  />
+
+                </span>
+              </span>
+              <div className="flex items-center gap-1">
+                <span>
+                  {cart.length > 0 &&
+                    `৳ ${discountValue.toFixed(2)} (${discountType === 'cash' ? `৳ ${Number(discount).toFixed(2)}` : `${Number(discount).toFixed(2)}%`})`
+                  }
+                </span>
+              </div>
             </div>
-          </div>
-          <Separator className="my-1" />
-          <div className="flex justify-between font-bold text-base">
-            <span>Total</span>
-            <span>${total.toFixed(2)}</span>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            <Button variant="outline" disabled={items.length === 0} className="h-8 text-xs">
+
+            <Separator className="my-1" />
+            <div className="flex justify-between font-bold text-base">
+              <span>Total</span>
+              {/* <span>${total.toFixed(2)}</span> */}
+              <span>৳ {totalValue.toFixed(2)}</span>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                Transaction Type
+              </div>
+              <div>
+                <Select value={transactionType} onValueChange={setTransactionType}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select Transaction Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value="cash">Cash</SelectItem>
+                      <SelectItem value="credit">Credit</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-2 mt-3">
+              {/* <Button variant="outline" disabled={cart.length === 0} className="h-8 text-xs">
               <Printer className="h-3 w-3 mr-1" />
               Receipt
-            </Button>
-            <Button
-              className="bg-primary h-8 text-xs font-semibold"
-              disabled={items.length === 0}
-              onClick={() => setIsPaymentModalOpen(true)}
-            >
-              <CreditCard className="h-3 w-3 mr-1" />
-              Pay ${total.toFixed(2)}
-            </Button>
+            </Button> */}
+              <div className="flex items-center justify-center">
+                <Button
+                  className="bg-primary h-8 text-xs font-semibold"
+                  disabled={cart.length === 0}
+                  // onClick={() => setIsPaymentModalOpen(true)}
+                  onClick={() => handleSell()}
+                >
+                  <CreditCard className="h-3 w-3 mr-1" />
+                  Pay
+                  {/* ${total.toFixed(2)} */}
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      
-      {/* Discount Modal */}
-      <DiscountModal
-        isOpen={discountModal.isOpen}
-        onClose={() => setDiscountModal({ isOpen: false, isCartDiscount: false })}
-        onApply={handleApplyDiscount}
-        currentDiscount={discountModal.currentDiscount}
-        itemPrice={discountModal.itemPrice}
-        isCartDiscount={discountModal.isCartDiscount}
-      />
-      
+      }
+
+
       {/* Payment Modal */}
-      <POSPaymentModal
-        isOpen={isPaymentModalOpen} 
+      {/* <POSPaymentModal
+        isOpen={isPaymentModalOpen}
         onClose={() => setIsPaymentModalOpen(false)}
         total={total}
-      />
+      /> */}
     </div>
   );
 }

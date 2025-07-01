@@ -1,49 +1,47 @@
-import { useState, useEffect } from 'react';
-import { Moon, Sun } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-// import { Badge } from '@/components/ui/badge';
-// import { useAuth } from '@/hooks/useAuth';
-import { jwtDecode } from 'jwt-decode';
-import type { DecodedToken } from '@/lib/types';
+import { useState, useEffect } from "react";
+import { Moon, Sun } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAppSelector } from "@/redux/hook";
+import userIcon from "@/assets/dp.jpg";
 interface HeaderProps {
   title: string;
-  accessToken: string;
 }
 
-export function Header({ title, accessToken }: HeaderProps) {
-  // const { user } = useAuth();
-  const user: DecodedToken = jwtDecode(accessToken as string);
+export function Header({ title }: HeaderProps) {
+  const user = useAppSelector((state) => state.auth.user);
 
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     // Check if user has a theme preference in localStorage
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
 
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
     } else {
       // Check system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
-      document.documentElement.classList.toggle('dark', prefersDark);
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      setTheme(prefersDark ? "dark" : "light");
+      document.documentElement.classList.toggle("dark", prefersDark);
     }
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === 'dark');
-    localStorage.setItem('theme', newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    localStorage.setItem("theme", newTheme);
   };
 
   const getInitials = (name: string) => {
     return name
-      .split(' ')
+      .split(" ")
       .map((n) => n[0])
-      .join('')
+      .join("")
       .toUpperCase();
   };
 
@@ -52,15 +50,15 @@ export function Header({ title, accessToken }: HeaderProps) {
       <h1 className="text-xl font-bold">{title}</h1>
       <div className="flex items-center space-x-4">
         <Button variant="default" size="icon" onClick={toggleTheme}>
-          {theme === 'light' ?
+          {theme === "light" ? (
             <div className="">
               <Moon className="h-5 w-5" />
             </div>
-            :
+          ) : (
             <div className="">
               <Sun className="h-5 w-5 text-black" />
             </div>
-          }
+          )}
         </Button>
         {/* <div className="relative">
           <Button variant="ghost" size="icon" className="relative">
@@ -74,11 +72,15 @@ export function Header({ title, accessToken }: HeaderProps) {
           <div className="flex items-center space-x-2">
             <div className="hidden md:block text-right">
               <p className="text-sm font-medium">{user?.name || "User"}</p>
-              <p className="text-xs text-muted-foreground capitalize">{user.role.replace('_', ' ')}</p>
+              <p className="text-xs text-muted-foreground capitalize">
+                {user.role.replace("_", " ")}
+              </p>
             </div>
             <Avatar>
-              <AvatarImage src={user?.avatar} alt={user?.name} />
-              <AvatarFallback>{getInitials(user?.name || 'User' as string)}</AvatarFallback>
+              <AvatarImage src={userIcon} alt={user?.name} />
+              <AvatarFallback>
+                {getInitials(user?.name || ("User" as string))}
+              </AvatarFallback>
             </Avatar>
           </div>
         )}

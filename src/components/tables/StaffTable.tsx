@@ -6,7 +6,6 @@ import { Staff } from '@/types/staff';
 import { formatRoleName } from '@/utils/staffUtiils';
 import StaffCard from '../staff/StaffCard';
 
-
 interface StaffTableProps {
   staff: Staff[];
   onEdit: (staff: Staff) => void;
@@ -120,8 +119,8 @@ const StaffTable: React.FC<StaffTableProps> = ({
                     </td>
                     <td className="p-4">
                       <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => onEdit(staffMember)}
                           className="hover:bg-blue-50 hover:border-blue-300"
@@ -129,14 +128,14 @@ const StaffTable: React.FC<StaffTableProps> = ({
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => onToggleStatus(staffMember.id)}
-                          className={`${staffMember.status === 'active' 
-                            ? 'text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300' 
+                          className={`${staffMember.status === 'active'
+                            ? 'text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300'
                             : 'text-green-500 hover:text-green-600 hover:bg-green-50 hover:border-green-300'
-                          }`}
+                            }`}
                         >
                           {staffMember.status === 'active' ? (
                             <>
@@ -150,9 +149,9 @@ const StaffTable: React.FC<StaffTableProps> = ({
                             </>
                           )}
                         </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => onDelete(staffMember.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
                         >
@@ -207,8 +206,8 @@ const StaffTable: React.FC<StaffTableProps> = ({
                     <td className="p-3">
                       <div className="flex flex-col space-y-2">
                         <div className="flex space-x-1">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
                             onClick={() => onEdit(staffMember)}
                             className="hover:bg-blue-50 hover:border-blue-300 text-xs"
@@ -216,14 +215,14 @@ const StaffTable: React.FC<StaffTableProps> = ({
                             <Edit className="h-3 w-3 mr-1" />
                             Edit
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => onToggleStatus(staffMember.id)}
-                            className={`text-xs ${staffMember.status === 'active' 
-                              ? 'text-red-500 hover:text-red-600 hover:bg-red-50' 
+                            className={`text-xs ${staffMember.status === 'active'
+                              ? 'text-red-500 hover:text-red-600 hover:bg-red-50'
                               : 'text-green-500 hover:text-green-600 hover:bg-green-50'
-                            }`}
+                              }`}
                           >
                             {staffMember.status === 'active' ? (
                               <>
@@ -238,9 +237,9 @@ const StaffTable: React.FC<StaffTableProps> = ({
                             )}
                           </Button>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => onDelete(staffMember.id)}
                           className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs w-full"
                         >

@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom';
 // import { useRoleRedirect } from '@/hooks/useRoleRedirect';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
-import { ShoppingCart, Receipt, BarChart3, User } from 'lucide-react';
+import { ShoppingCart, Receipt, BarChart3 } from 'lucide-react';
 import { jwtDecode } from 'jwt-decode';
 import type { DecodedToken } from '@/lib/types';
 
@@ -22,11 +22,11 @@ const menuItems = [
     path: '/cashier/reports',
     icon: <BarChart3 size={20} />,
   },
-  {
-    title: 'Profile',
-    path: '/cashier/profile',
-    icon: <User size={20} />,
-  },
+  // {
+  //   title: 'Profile',
+  //   path: '/cashier/profile',
+  //   icon: <User size={20} />,
+  // },
 ];
 
 export function CashierLayout() {

@@ -1,46 +1,90 @@
-// app/categories/page.tsx
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Search, Layers } from 'lucide-react';
-import { MOCK_CATEGORIES, MOCK_PRODUCTS } from '@/lib/constants';
-import { Category, Product } from '@/types/category';
+import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Layers, Edit, Trash2, RefreshCw } from "lucide-react";
+import { Category } from "@/types/category";
 import { AddCategoryModal } from '@/components/modals/AddCategoryModal';
-import { EditCategoryModal } from '@/components/modals/EditCategoryModal';
+import { EditCategoryModal } from "@/components/modals/EditCategoryModal";
+import axios from "axios";
 
 
 export default function CategoriesPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
+  const [isloading, setIsLoading] = useState<boolean>(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  
-  const filteredCategories = categories.filter(category => 
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
-  const getProductCount = (categoryId: string) => {
-    return MOCK_PRODUCTS.filter((product: Product) => product.categoryId === categoryId).length;
+
+  const fetchCategorys = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get('/api/v1/category/all-category', {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      });
+      setCategories(response.data.data);
+    } catch {
+      await fetchCategorys();
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchCategorys();
+  }, [fetchCategorys]);
+
+
+  const handleAddCategory = async (newCategory: { categoryName: string; description: string }) => {
+    setIsLoading(true);
+    await axios.post('/api/v1/category/create-category', {
+      categoryName: newCategory.categoryName,
+      description: newCategory.description
+    }, {
+      headers: {
+        'Authorization': `${localStorage.getItem('accessToken')}`
+      },
+    });
+    await fetchCategorys();
+    setIsLoading(false);
   };
 
-  const handleAddCategory = (newCategory: { name: string; description: string }) => {
-    const categoryToAdd: Category = {
-      id: Math.random().toString(36).substring(2, 9),
-      ...newCategory
-    };
-    setCategories([...categories, categoryToAdd]);
-  };
-
-  const handleUpdateCategory = (updatedCategory: Category) => {
-    setCategories(categories.map(cat => 
-      cat.id === updatedCategory.id ? updatedCategory : cat
-    ));
+  const handleUpdateCategory = async ({ _id, categoryName, description }: { _id: string, categoryName: string, description: string }) => {
+    setIsLoading(true);
+    await axios.patch(`/api/v1/category/update-category/${_id}`, {
+      categoryName: categoryName,
+      description: description
+    },
+      {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      }
+    );
+    await fetchCategorys();
     setEditingCategory(null);
+    setIsLoading(false);
   };
 
-  const handleDeleteCategory = (categoryId: string) => {
-    setCategories(categories.filter(category => category.id !== categoryId));
+  const handleDeleteCategory = async (categoryId: string) => {
+    setIsLoading(true);
+    const confirmed = window.confirm(
+      `Are you sure you want to delete this category?`
+    );
+    if (confirmed) {
+      await axios.patch(`/api/v1/shop-role/update-staff/${categoryId}`, {
+        headers: {
+          'Authorization': `${localStorage.getItem('accessToken')}`,
+          'Content-Type': 'application/json'
+        },
+      })
+      alert(`Category deleted successfully`);
+      await fetchCategorys();
+    }
+    await fetchCategorys();
+    setIsLoading(false);
   };
 
   return (
@@ -50,7 +94,9 @@ export default function CategoriesPage() {
           <Layers className="h-6 w-6" />
           <CardTitle>Categories</CardTitle>
         </div>
-        <AddCategoryModal onSave={handleAddCategory}>
+        <AddCategoryModal
+          onSave={handleAddCategory}
+        >
           <Button>
             <Plus className="mr-2 h-4 w-4" />
             Add New Category
@@ -58,58 +104,54 @@ export default function CategoriesPage() {
         </AddCategoryModal>
       </CardHeader>
       <CardContent>
-        <div className="mb-6">
-          <h2 className="text-lg font-semibold">Category Management</h2>
-          <div className="mt-4 relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-            <Input
-              placeholder="Search categories..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+        {isloading &&
+          <div className="flex items-center justify-center p-4">
+            <RefreshCw className="h-28 w-28 animate-spin text-primary" />
           </div>
-        </div>
-
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Category Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Products</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredCategories.map((category) => (
-              <TableRow key={category.id}>
-                <TableCell className="font-medium">{category.name}</TableCell>
-                <TableCell>{category.description || 'No description'}</TableCell>
-                <TableCell>{getProductCount(category.id)} products</TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setEditingCategory(category)}
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="destructive" 
-                      size="sm"
-                      onClick={() => handleDeleteCategory(category.id)}
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                </TableCell>
+        }
+        {
+          !isloading &&
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-100">
+                <TableHead className="text-center">Sl.</TableHead>
+                <TableHead>Category Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {categories.map((category, index) => (
+                <TableRow key={index}>
+                  <TableCell className="text-center">{index + 1}</TableCell>
+                  <TableCell className="font-medium">{category.categoryName}</TableCell>
+                  <TableCell>{category.description || 'No description'}</TableCell>
+                  <TableCell>
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditingCategory(category)}
+                      >
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50 text-xs"
+                        onClick={() => handleDeleteCategory(category._id)}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        }
 
         {editingCategory && (
           <EditCategoryModal

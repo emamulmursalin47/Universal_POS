@@ -1,98 +1,43 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { User, UserRole } from '@/lib/types';
-import { MOCK_USERS } from '@/lib/constants';
-import { jwtDecode } from 'jwt-decode'; // Install this: npm install jwt-decode
-import axios from 'axios';
-import { decode } from 'punycode';
+import { createSlice } from "@reduxjs/toolkit";
+import { RootState } from "../store";
 
-interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  error: string | null;
-}
-
-const initialState: AuthState = {
-  user: null,
-  isAuthenticated: false,
-  isLoading: false,
-  error: null,
-};
-interface DecodedToken {
-  email: string;
-  role: UserRole;
-  userId: string;
+type TUser = {
   _id: string;
-  iat: number;
-  exp: number;
-}
+  userId: string;
+  email: string;
+  role: string;
+  name: string;
+  storeName: string;
+};
 
-export const authSlice = createSlice({
-  name: 'auth',
+type TAuthState = {
+  user: TUser | null;
+  token: string | null;
+};
+
+const initialState: TAuthState = {
+  user: null,
+  token: null,
+};
+
+const authSlice = createSlice({
+  name: "auth",
   initialState,
   reducers: {
-    loginStart: (state) => {
-      state.isLoading = true;
-      state.error = null;
+    setUser: (state, action) => {
+      const { user, token } = action.payload;
+      state.user = user;
+      state.token = token;
     },
-    loginSuccess: (state, action: PayloadAction<User>) => {
-      state.isLoading = false;
-      state.isAuthenticated = true;
-      state.user = action.payload;
-      state.error = null;
-    },
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.isLoading = false;
-      state.isAuthenticated = false;
+    logOut: (state) => {
       state.user = null;
-      state.error = action.payload;
-    },
-    logout: (state) => {
-      state.user = null;
-      state.isAuthenticated = false;
-      state.error = null;
+      state.token = null;
     },
   },
 });
 
-// Mock login function (to be replaced with real API calls)
-export const loginUser = (email: string, password: string) => {
-  return async (dispatch: any) => {
-    dispatch(loginStart());
+export const { setUser, logOut } = authSlice.actions; //This line exports the setUser and logOut actions, allowing you to dispatch these actions from components or other parts of the application.
+export default authSlice.reducer; //This reducer handles state updates for the auth slice and will be added to the Redux store.
 
-    try {
-      const response = await axios.post('/api/v1/auth/login', { email, password });
-
-      if (response.data.success) {
-        const { accessToken } = response.data.data;
-
-        localStorage.setItem('accessToken', accessToken);
-
-        const decoded: DecodedToken = jwtDecode(accessToken);
-        console.log(decoded.role);
-        dispatch(loginSuccess(decoded.userId));
-        return { success: true, role: decoded.role };
-      }
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Find user with matching email (in a real app, this would be a server-side check)
-      const foundUser = Object.values(MOCK_USERS).find(user => user.email === email);
-
-      if (foundUser && password === 'password') { // Simple mock password check
-        dispatch(loginSuccess(foundUser));
-        return { success: true, role: decoded.role };
-      } else {
-        dispatch(loginFailure('Invalid email or password'));
-        return { success: false, role: null };
-      }
-    } catch (error) {
-      dispatch(loginFailure('An error occurred during login'));
-      return { success: false, role: null };
-    }
-  };
-};
-
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
-
-export default authSlice.reducer;
+export const selectCurrentUser = (state: RootState) => state.auth.user;
+export const selectCurrentToken = (state: RootState) => state.auth.token;

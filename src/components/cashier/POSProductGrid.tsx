@@ -1,74 +1,105 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
-// import { useDispatch } from 'react-redux';
-// import { addItem } from '@/redux/slices/cartSlice';
-import { MOCK_PRODUCTS, MOCK_CATEGORIES } from '@/lib/constants';
-import type { Product } from '@/lib/types';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, EyeIcon, EyeOffIcon, BarcodeIcon } from "lucide-react";
+import type { Product, Category } from "@/lib/types";
 
-export function POSProductGrid() {
-  // const dispatch = useDispatch();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 25; // Show more items per page
+interface POSProductGridProps {
+  products: Product[];
+  categories: Category[];
+  cart: Product[];
+  setCart: React.Dispatch<React.SetStateAction<Product[]>>;
+}
+
+export function POSProductGrid({ products, categories, cart, setCart }: POSProductGridProps) {
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState("all");
+  const [showBuyPrice, setShowBuyPrice] = useState(false);
+
 
   const handleAddToCart = (product: Product) => {
-    // dispatch(addItem({ product, quantity: 1 }));
+    const existingItem = cart.find((item) => item._id === product._id)
+    if (!existingItem) {
+      setCart((prevCart: Product[]) => [...prevCart, { ...product, buyquantity: 1 }]);
+    }
   };
 
-  const filteredProducts = MOCK_PRODUCTS.filter((product) => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.barcode?.includes(searchTerm) ||
-      product.sku.includes(searchTerm);
-    const matchesCategory = activeTab === 'all' || product.categoryId === activeTab;
+  const handleSearchAddToCart = (value: string) => {
+    // console.log('Add to cart:', value);
+    products.filter((product) => {
+      if (product.barCodeNumber == value) {
+        handleAddToCart(product);
+        setSearchTerm('');
+      }
+    });
+  };
+
+  // search by name, sku, or bar code
+  const filteredProducts = products.filter((product) => {
+    // console.log('product', product);
+    // console.log('searchTerm', searchTerm);
+    const matchesSearch = product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      || product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory = activeTab === 'all' || product.category._id === activeTab;
     return matchesSearch && matchesCategory;
   });
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
   // Reset to first page when search or category changes
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
+  };
+
+  const handleShowBuyPriceChange = (value: boolean) => {
+    setShowBuyPrice(value);
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
   };
 
   const getStockStatus = (stock: number) => {
-    if (stock === 0) return { text: 'Out', color: 'text-red-600 bg-red-50' };
-    if (stock <= 5) return { text: 'Low', color: 'text-amber-600 bg-amber-50' };
-    return { text: 'OK', color: 'text-green-600 bg-green-50' };
+    if (stock === 0) return { text: 'Out', color: 'text-red-600 bg-red-50 px-3 py-1 rounded-xl' };
+    if (stock <= 5) return { text: 'Low', color: 'text-amber-600 bg-amber-50 px-3 py-1 rounded-xl' };
+    return { text: 'OK', color: 'text-green-600 bg-green-50 px-3 py-1 rounded-xl' };
   };
 
   return (
-    <div className="flex flex-col h-full border rounded-lg bg-card">
+    <div className="flex flex-col h-full border rounded-lg bg-card pb-2">
       {/* Compact Search Bar */}
       <div className="flex items-center gap-2 p-3 border-b">
+        <div className="flex items-center gap-2 relative">
+          <BarcodeIcon className="absolute left-2 top-2.5 h-3 w-3 text-muted-foreground" />
+          <Input
+            id="barcode"
+            placeholder="Scan barcode"
+            onChange={(f) => handleSearchAddToCart(f.target.value)}
+            onKeyDown={(g) => {
+              if (g.key === 'Enter') {
+                handleSearchAddToCart((g.target as HTMLInputElement).value);
+              }
+            }}
+            className="pl-7 h-8 text-sm"
+          />
+        </div>
+
         <div className="relative flex-1">
           <Search className="absolute left-2 top-2.5 h-3 w-3 text-muted-foreground" />
           <Input
-            placeholder="Search products, scan barcode..."
+            id="searchProduct"
+            placeholder="Search products"
             value={searchTerm}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-7 h-8 text-sm"
           />
         </div>
-        <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-          <Filter className="h-3 w-3" />
+        <Button
+          variant="outline" size="sm" className="h-8 w-8 p-0"
+          onClick={() => handleShowBuyPriceChange(!showBuyPrice)}
+          title={showBuyPrice ? 'Hide Buy Price' : 'Show Buy Price'}
+        >
+          {showBuyPrice ? <EyeOffIcon className="h-3 w-3" /> : <EyeIcon className="h-3 w-3" />}
         </Button>
       </div>
 
@@ -77,9 +108,9 @@ export function POSProductGrid() {
         <div className="px-3 pt-2">
           <TabsList className="grid grid-flow-col auto-cols-max gap-1 h-8">
             <TabsTrigger value="all" className="text-xs px-2">All</TabsTrigger>
-            {MOCK_CATEGORIES.map((category) => (
-              <TabsTrigger key={category.id} value={category.id} className="text-xs px-2">
-                {category.name}
+            {categories.map((category) => (
+              <TabsTrigger key={category._id} value={category._id} className="text-xs px-2">
+                {category.categoryName}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -88,8 +119,7 @@ export function POSProductGrid() {
         <TabsContent value={activeTab} className="flex-1 mt-2 flex flex-col min-h-0">
           {/* Compact Results Summary */}
           <div className="flex justify-between items-center px-3 pb-2 text-xs text-muted-foreground">
-            <span>{startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length}</span>
-            <span>Page {currentPage}/{totalPages}</span>
+            <span>{filteredProducts.length} out of {products.length} products</span>
           </div>
 
           {/* Compact Product Table */}
@@ -98,34 +128,45 @@ export function POSProductGrid() {
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 sticky top-0 z-10">
                   <tr className="border-b text-xs">
+                    <th className="text-center p-2 font-medium w-5">Sl.</th>
                     <th className="text-left p-2 font-medium">Product</th>
-                    <th className="text-left p-2 font-medium w-20">SKU</th>
-                    <th className="text-right p-2 font-medium w-16">Price</th>
+                    <th className="text-left p-2 font-medium w-12">SKU</th>
+                    {
+                      showBuyPrice && (
+                        <th className="text-right p-2 font-medium w-12">Buy Price</th>
+                      )
+                    }
+                    <th className="text-right p-2 font-medium w-12">Sell Price</th>
                     <th className="text-center p-2 font-medium w-12">Stock</th>
                     <th className="text-center p-2 font-medium w-16">Status</th>
-                    <th className="text-center p-2 font-medium w-16">Add</th>
+                    <th className="text-center p-2 font-medium w-16">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {currentProducts.length > 0 ? (
-                    currentProducts.map((product, index) => {
-                      const stockStatus = getStockStatus(product.stock);
+                  {filteredProducts.length > 0 ? (
+                    filteredProducts.map((product, index) => {
+                      const stockStatus = getStockStatus(product.quantity);
                       return (
                         <tr
-                          key={product.id}
+                          key={index}
                           className={`border-b hover:bg-accent cursor-pointer transition-colors text-sm ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'
                             }`}
-                          onClick={() => handleAddToCart(product)}
+                        // onClick={() => handleAddToCart(product)}
                         >
+                          <td className="p-2 text-center">{index + 1}</td>
                           <td className="p-2">
-                            <div className="font-medium leading-tight">{product.name}</div>
-                            {product.barcode && (
-                              <div className="text-xs text-muted-foreground font-mono">{product.barcode}</div>
+                            <div className="font-medium leading-tight">{product.productName}</div>
+                            {product.barCodeNumber && (
+                              <div className="text-xs text-muted-foreground font-mono">{product.barCodeNumber}</div>
                             )}
                           </td>
                           <td className="p-2 font-mono text-xs">{product.sku}</td>
-                          <td className="p-2 text-right font-bold">${product.price.toFixed(2)}</td>
-                          <td className="p-2 text-center font-medium">{product.stock}</td>
+                          {
+                            showBuyPrice && (
+                              <td className="p-2 text-right font-bold">৳{product.buyPrice.toFixed(2)}</td>
+                            )}
+                          <td className="p-2 text-right font-bold">৳{product.sellingPrice.toFixed(2)}</td>
+                          <td className="p-2 text-center font-medium">{product.quantity}</td>
                           <td className="p-2 text-center">
                             <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${stockStatus.color}`}>
                               {stockStatus.text}
@@ -138,7 +179,7 @@ export function POSProductGrid() {
                                 e.stopPropagation();
                                 handleAddToCart(product);
                               }}
-                              disabled={product.stock === 0}
+                              disabled={product.quantity === 0}
                               className="h-6 px-2 text-xs"
                             >
                               +
@@ -158,60 +199,6 @@ export function POSProductGrid() {
               </table>
             </div>
           </div>
-
-          {/* Compact Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between p-3 border-t mt-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="h-7 px-2 text-xs"
-              >
-                <ChevronLeft className="h-3 w-3 mr-1" />
-                Prev
-              </Button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePageChange(pageNum)}
-                      className="h-7 w-7 p-0 text-xs"
-                    >
-                      {pageNum}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="h-7 px-2 text-xs"
-              >
-                Next
-                <ChevronRight className="h-3 w-3 ml-1" />
-              </Button>
-            </div>
-          )}
         </TabsContent>
       </Tabs>
     </div>

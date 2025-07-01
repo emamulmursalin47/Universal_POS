@@ -1,31 +1,50 @@
 // types/staff.ts
-export interface Staff {
-  id: string;
-  name: string;
+// export interface Staff {
+//   id: string;
+//   name: string;
+//   email: string;
+//   role: 'cashier' | 'vendor_admin';
+//   loginId: string;
+//   password: string;
+//   avatar?: string | null;
+//   status: 'active' | 'inactive';
+//   createdAt: Date;
+//   updatedAt: Date;
+// }
+
+export type StaffTypesNew = {
+  _id: string;
+  userId: string;
+  user: string;
   email: string;
-  role: 'cashier' | 'vendor_admin';
-  loginId: string;
-  password: string;
-  avatar?: string | null;
+  vendorId: string;
+  fullName: string;
+  contactNumber: string;
+  address: string;
+  databaseName: string;
+  role: 'admin' | 'manager' | 'staff';
   status: 'active' | 'inactive';
-  createdAt: Date;
-  updatedAt: Date;
-}
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export interface StaffFormData {
-  id: string;
-  name: string;
   email: string;
-  role: 'cashier' | 'vendor_admin' | '';
-  loginId: string;
-  password: string;
+  fullName: string;
+  contactNumber: string;
+  address: string;
+  password?: string;
+  role?: string;
+  status?: string,
 }
 
 export interface StaffFormErrors {
-  id?: string;
-  name?: string;
   email?: string;
-  role?: string;
-  loginId?: string;
+  fullName?: string;
+  contactNumber?: string;
+  address?: string;
   password?: string;
+  role?: string;
+  status?: string
 }
