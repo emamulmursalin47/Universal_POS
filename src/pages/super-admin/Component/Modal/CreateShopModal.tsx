@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shopFormSchema } from "../shopFormSchema";
 import { toast } from "sonner";
-import ShopForm from "./ShopForm";
+import ShopForm from "../Form/ShopForm";
 
 interface CreateShopModalProps {
   open: boolean;

@@ -1,45 +1,42 @@
+// src/types/subscription.ts
+export type TSubscriptionStatus = "active" | "expired" | "cancelled";
+export type TBillingCycle = "monthly" | "yearly" | "quarterly";
 
-export interface SubscriptionPlan {
-  id: string;
-  name: string;
-  // supportLevel: 'basic' | 'standard' | 'premium';
-  isEnabled: boolean;
+export interface ISubscription {
   _id: string;
   planName: string;
   price: number;
-  description?: string;
-  billingCycle: 'monthly' | 'yearly'|'quarterly'; // Add more options if applicable
+  description: string;
+  billingCycle: TBillingCycle;
   maxProducts: number;
   maxUsers: number;
   supportLevel: string;
-  features?: string[];
-  status: 'active' | 'inactive'; // Add more statuses if needed
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
-
-}
-
-export interface ActiveSubscription {
-  id: number;
-  shopName: string;
-  plan: string;
-  status: 'active' | 'expired' | 'pending';
-  nextBilling: string;
-  amount: number;
-}
-
-export interface CreatePlanFormData {
-  name: string;
-  price: string;
-  billingCycle: 'monthly' | 'yearly' | 'quarterly';
-  description: string;
   features: string[];
-  maxProducts: string;
-  maxUsers: string;
-  supportLevel: 'basic' | 'standard' | 'premium';
+  status: TSubscriptionStatus;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface EditPlanFormData extends CreatePlanFormData {
-  id: string;
-  isEnabled: boolean;
+export interface SubscriptionFormValues {
+  planName: string;
+  price: number;
+  description: string;
+  billingCycle: TBillingCycle;
+  maxProducts: number;
+  maxUsers: number;
+  supportLevel: string;
+  features: string[];
+  status: TSubscriptionStatus;
+}
+
+export interface ISubscriptionResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  data: ISubscription[];
+  meta?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }

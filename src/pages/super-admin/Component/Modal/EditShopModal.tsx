@@ -12,7 +12,7 @@ import { useEffect } from "react";
 import { useEditShopMutation } from "@/redux/api/shopApi";
 import { editShopValidationSchema } from "../shopFormSchema";
 import { toast } from "sonner";
-import EditShopForm from "./EditShopForm";
+import EditShopForm from "../Form/EditShopForm";
 
 interface EditShopModalProps {
   shop: any;
