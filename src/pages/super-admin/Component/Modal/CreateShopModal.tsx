@@ -52,7 +52,7 @@ const CreateShopModal = ({ open, onClose }: CreateShopModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Shop</DialogTitle>
         </DialogHeader>

@@ -1,6 +1,3 @@
-// src/app/(dashboard)/admin/subscriptions/components/EditSubscriptionModal.tsx
-"use client";
-
 import {
   Dialog,
   DialogContent,
@@ -24,7 +21,7 @@ const EditSubscriptionModal = ({
 }: EditSubscriptionModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Subscription Plan</DialogTitle>
         </DialogHeader>

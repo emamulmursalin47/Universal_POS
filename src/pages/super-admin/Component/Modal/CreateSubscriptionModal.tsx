@@ -1,5 +1,4 @@
 // src/app/(dashboard)/admin/subscriptions/components/CreateSubscriptionModal.tsx
-"use client";
 
 import {
   Dialog,
@@ -20,7 +19,7 @@ const CreateSubscriptionModal = ({
 }: CreateSubscriptionModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Subscription Plan</DialogTitle>
         </DialogHeader>

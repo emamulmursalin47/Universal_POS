@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/pages/super-admin/shops/ShopPage.tsx
-"use client";
 
 import { useState } from "react";
 import { useGetAllShopsQuery } from "@/redux/api/shopApi";

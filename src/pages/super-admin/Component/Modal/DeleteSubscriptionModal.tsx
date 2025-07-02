@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// src/app/(dashboard)/admin/subscriptions/components/DeleteSubscriptionModal.tsx
-"use client";
 
 import {
   AlertDialog,

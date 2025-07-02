@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
@@ -227,15 +226,14 @@ const CreateSubscriptionForm = ({ onSuccess }: CreateSubscriptionFormProps) => {
                   </FormItem>
                 )}
               />
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="icon"
                 onClick={() => remove(index)}
                 disabled={fields.length <= 1}
+                className="bg-gray-50 border border-gray-300"
               >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </button>
             </div>
           ))}
           <Button

@@ -69,7 +69,7 @@ const EditShopModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] h-[600px] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Shop: {shop?.shopName}</DialogTitle>
         </DialogHeader>

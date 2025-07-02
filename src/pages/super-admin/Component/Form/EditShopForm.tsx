@@ -48,10 +48,10 @@ const EditShopForm = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {/* Display shop name (readonly) */}
-        <div className="space-y-2">
+        <div className="space-y-2 ">
           <FormLabel>Shop Name</FormLabel>
-          <div className="p-2 border rounded-md bg-gray-50 dark:bg-gray-800">
-            <p className="text-sm">{shopName}</p>
+          <div className="p-2 border rounded-md bg-gray-100 dark:bg-gray-800 cursor-not-allowed">
+            <p className="text-sm font-semibold">{shopName}</p>
           </div>
         </div>
 

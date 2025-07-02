@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { useForm, useFieldArray } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdateSubscriptionMutation } from "@/redux/api/subscriptionApi";
 import { toast } from "sonner";
+
 import {
   Form,
   FormControl,
@@ -22,9 +21,22 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ISubscription } from "@/types/subscription";
-import { SubscriptionValidation } from "../Subscription/SubscriptionSchema";
 import { Plus, Trash2 } from "lucide-react";
+import { useUpdateSubscriptionMutation } from "@/redux/api/subscriptionApi";
+import { ISubscription } from "@/types/subscription";
+
+// Updated type
+type TEditSubscriptionFormValues = {
+  planName?: string;
+  price?: number;
+  description?: string;
+  billingCycle?: "monthly" | "quarterly" | "yearly";
+  maxProducts?: number;
+  maxUsers?: number;
+  supportLevel?: "basic" | "standard" | "premium";
+  features: { value: string }[]; // updated from string[] to object[]
+  status?: "active" | "expired" | "cancelled";
+};
 
 interface EditSubscriptionFormProps {
   subscription: ISubscription;
@@ -37,10 +49,7 @@ const EditSubscriptionForm = ({
 }: EditSubscriptionFormProps) => {
   const [updateSubscription] = useUpdateSubscriptionMutation();
 
-  const form = useForm({
-    resolver: zodResolver(
-      SubscriptionValidation.updateSubscriptionSchemaValidation
-    ),
+  const form = useForm<TEditSubscriptionFormValues>({
     defaultValues: {
       planName: subscription.planName,
       price: subscription.price,
@@ -48,20 +57,39 @@ const EditSubscriptionForm = ({
       billingCycle: subscription.billingCycle,
       maxProducts: subscription.maxProducts,
       maxUsers: subscription.maxUsers,
-      supportLevel: subscription.supportLevel,
-      features: subscription.features.length > 0 ? subscription.features : [""], // Ensure at least one feature field
+      supportLevel: subscription.supportLevel as
+        | "basic"
+        | "standard"
+        | "premium"
+        | undefined,
+      features:
+        subscription.features.length > 0
+          ? subscription.features.map((f) => ({ value: f }))
+          : [{ value: "" }],
       status: subscription.status,
     },
   });
 
-  const { fields, append, remove } = useFieldArray({ name: "features" });
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "features",
+  });
 
-  const onSubmit = async (values: any) => {
+  const onSubmit = async (values: TEditSubscriptionFormValues) => {
     try {
-      // Filter out empty features
-      const filteredFeatures = values.features.filter(
-        (feature: string) => feature.trim() !== ""
-      );
+      if (!values.planName?.trim()) {
+        toast.error("Plan name is required");
+        return;
+      }
+
+      if (values.price !== undefined && values.price < 0) {
+        toast.error("Price must be a positive number");
+        return;
+      }
+
+      const filteredFeatures = values.features
+        .map((f) => f.value.trim())
+        .filter((f) => f !== "");
 
       const res = await updateSubscription({
         id: subscription._id,
@@ -72,11 +100,11 @@ const EditSubscriptionForm = ({
       }).unwrap();
 
       if (res?.statusCode === 200) {
-        toast.success("Subscription plan updated successfully");
+        toast.success("Subscription updated successfully");
         onSuccess();
       }
     } catch (error: any) {
-      toast.error(error?.data?.message || "Failed to update subscription plan");
+      toast.error(error?.data?.message || "Update failed");
     }
   };
 
@@ -107,7 +135,6 @@ const EditSubscriptionForm = ({
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter price"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -151,11 +178,7 @@ const EditSubscriptionForm = ({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Enter plan description"
-                  {...field}
-                  rows={3}
-                />
+                <Textarea placeholder="Description" {...field} rows={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -172,7 +195,6 @@ const EditSubscriptionForm = ({
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter max products"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -191,7 +213,6 @@ const EditSubscriptionForm = ({
                 <FormControl>
                   <Input
                     type="number"
-                    placeholder="Enter max users"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -231,7 +252,7 @@ const EditSubscriptionForm = ({
             <div key={field.id} className="flex gap-2 items-center">
               <FormField
                 control={form.control}
-                name={`features.${index}`}
+                name={`features.${index}.value`}
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
@@ -241,22 +262,20 @@ const EditSubscriptionForm = ({
                   </FormItem>
                 )}
               />
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                size="icon"
                 onClick={() => remove(index)}
                 disabled={fields.length <= 1}
+                className="bg-gray-50 border border-gray-300"
               >
-                <Trash2 className="h-4 w-4 text-red-500" />
-              </Button>
+                <Trash2 className="h-4 w-4 text-red-600" />
+              </button>
             </div>
           ))}
           <Button
             type="button"
             variant="outline"
-            className="mt-2"
-            onClick={() => append("")}
+            onClick={() => append({ value: "" })}
           >
             <Plus className="mr-2 h-4 w-4" />
             Add Feature
