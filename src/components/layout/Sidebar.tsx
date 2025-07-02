@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { SidebarProps } from "@/types/sidebar";
 import { DesktopSidebar } from "../sidebar/DesktopSidebar";
 import { useAppSelector } from "@/redux/hook";
+import { logout } from "@/Services/authServices";
 
 export function Sidebar({ menuItems, title = "POS System" }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
@@ -54,8 +55,8 @@ export function Sidebar({ menuItems, title = "POS System" }: SidebarProps) {
   const navigate = useNavigate();
 
   const handleSignOut = () => {
-    localStorage.removeItem("accessToken"); // Clear token
-    navigate("/login"); // Redirect to login route
+    logout();
+    navigate("/login");
   };
 
   return (

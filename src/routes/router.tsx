@@ -7,7 +7,6 @@ import LoginPage from "@/pages/auth/LoginPage";
 // Super Admin Routes
 import { SuperAdminLayout } from "@/components/layout/SuperAdminLayout";
 import SuperAdminDashboard from "@/pages/super-admin/SuperAdminDashboard";
-import ShopsPage from "@/pages/super-admin/ShopsPage";
 import SubscriptionsPage from "@/pages/super-admin/SubscriptionsPage";
 
 // Vendor Admin Routes
@@ -27,6 +26,7 @@ import SalesHistoryPage from "@/pages/cashier/SalesHistoryPage";
 import ReportsPage from "@/pages/cashier/ReportsPage";
 import InvoiceReceipt from "@/pages/cashier/InvoiceReceipt";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import ShopPage from "@/pages/super-admin/ShopsPage";
 
 export const router = createBrowserRouter([
   // Public Routes
@@ -54,7 +54,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "shops",
-        element: <ShopsPage />,
+        element: <ShopPage />,
       },
       {
         path: "subscriptions",
