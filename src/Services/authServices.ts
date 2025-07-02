@@ -1,7 +1,8 @@
 import Cookies from "js-cookie";
 
 import { axiosInstance } from "@/helper/axios/axiosInstance";
-import { removeFromLocalStorage } from "@/utils/local-storage";
+import { store } from "@/redux/store";
+import { logOut } from "@/redux/slices/authSlice";
 
 export const setTokenInCookies = (
   accessToken: string,
@@ -20,7 +21,8 @@ export const getAccessTokenFromCookies = (): string | undefined => {
 export const logout = (): void => {
   Cookies.remove("accessToken");
   Cookies.remove("refreshToken");
-  removeFromLocalStorage("accessToken");
+  // Dispatch logout action to clear Redux state
+  store.dispatch(logOut());
 };
 
 export const getNewAccessToken = async (): Promise<string> => {

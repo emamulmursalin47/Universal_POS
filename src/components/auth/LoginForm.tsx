@@ -123,12 +123,12 @@ export function LoginForm() {
         break;
     }
 
-    console.log("userInfo", userInfo);
+    // console.log("userInfo", userInfo);
 
     try {
       const res = await login(userInfo).unwrap();
 
-      console.log("Login response:", res);
+      // console.log("Login response:", res);
 
       if (res?.statusCode === 200) {
         toast.success(res?.message || "Login successful");
